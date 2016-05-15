@@ -1,0 +1,97 @@
+
+/*边框样式*/
+div.border-solid{
+	border:1px solid #7EC4F5;
+	padding:20px 10px;
+	position:relative;
+	margin-bottom:30px;
+}
+div.border-solid h4.title{
+	position:absolute;
+	top:-27px;
+}
+
+div.border-solid h4.title-no-top-mar{
+	position:absolute;
+	top:-27px;
+}
+
+
+h4.title{
+	background-color:#fff;
+	color:#7EC4F5;
+	text-align:left; 
+	font-family:"Microsoft YaHei";
+	font-size:18px;
+	font-weight:bolder;
+	padding:5px 20px;}
+
+h4.title-no-top-mar{
+	background-color:#fff;
+	color:#7EC4F5;
+	text-align:left; 
+	font-family:"Microsoft YaHei";
+	font-size:18px;
+	font-weight:bolder;
+	padding:5px 20px;}
+
+
+/*块隐藏*/
+div.audit-info,div.rectify-info,
+div.sale-info,
+span.stop_mode-sub,
+span.stop_mode-sub-sub,
+div.other-dispute_name,
+div.stop_category_remark,
+span.sublet_num,
+span.stop_time,
+div.investment-info,
+div.dispute-info,
+div.makeup{
+	display:none;
+}
+
+/*虚线下划*/
+.dashed-line{
+	margin:10px 0px;
+	border-bottom:1px dashed #888888;
+}
+
+
+h5.title{
+	font-weight:bolder;
+}
+
+
+div.tip{margin:10px 2%;}
+.center-text{ text-align:center;}
+textarea[name='project.remark']{
+	padding:5px;
+	outline-style:none;
+	width:100%;
+	height:200px;
+}
+
+
+/*bootstrap 样式覆盖*/
+span.check-item{padding:5px 10px;}
+span.check-item input{margin:10px 5px;}
+.form-horizontal .checkbox, .form-horizontal .checkbox-inline, .form-horizontal .radio{
+	padding-top:0px;
+}
+.form-horizontal .form-group{
+	margin-bottom:5px;
+}
+.input-group-addon{    background-color: #fff;}
+.btn.default:not(.btn-outline){
+	 background-color: #fff;
+}
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control{  background-color: #fff; }
+div.province-city-county,div.yes-or-no{
+	padding-left:0px;
+	padding-right:0px;
+}
+
+.form .form-body, .portlet-form .form-body {
+	background-image:url("/images/shuiyin.png");
+}

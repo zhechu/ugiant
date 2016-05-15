@@ -1,0 +1,8 @@
+div.clear{clear:both;}
+h5.title{font-weight:bolder;}
+.dashed-border{
+	padding:10px 5px;
+	border:1px solid #E7E3E3;
+	margin-bottom:20px;}
+	
+.input-group-addon{background-color:#E1E5EC;}
