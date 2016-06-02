@@ -76,12 +76,12 @@ public class PublicController extends BaseController {
 			loginUserInfo.setRoleIds(roleIds);
 			
 			// 将登录用户信息存入 session
-			this.getSession().setAttribute(SessionAttriKey.LOGINUSERINFO, loginUserInfo);
+			this.getSession().setAttribute(SessionAttriKey.LOGIN_USER_INFO, loginUserInfo);
 		} catch (MyException me) {
 			rm.msgFailed(me.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
-			rm.msgFailed(MyMessage.sysExceptionMsg);
+			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
 		}
 		this.renderJson(rm);
 	}
@@ -119,7 +119,7 @@ public class PublicController extends BaseController {
 			rm.msgFailed(me.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
-			rm.msgFailed(MyMessage.sysExceptionMsg);
+			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
 		}
 		this.renderJson(rm);
 	}

@@ -7,6 +7,6 @@ package com.ugiant.constant.tpb;
  */
 public class SessionAttriKey {
 
-	public static final String LOGINUSERINFO = "login_user_info";
+	public static final String LOGIN_USER_INFO = "login_user_info";
 	
 }

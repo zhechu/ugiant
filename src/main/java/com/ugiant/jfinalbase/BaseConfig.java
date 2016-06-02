@@ -76,7 +76,7 @@ public class BaseConfig extends JFinalConfig {
 			public void intercept(Invocation inv) {
 				String rpath = inv.getController().getRequest().getServletPath();
 				boolean flag = false; // 用户登录标记
-				LoginUserInfo loginUserInfo = (LoginUserInfo) inv.getController().getSession().getAttribute(SessionAttriKey.LOGINUSERINFO);
+				LoginUserInfo loginUserInfo = (LoginUserInfo) inv.getController().getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
 				if (loginUserInfo != null) {
 					flag = true;
 					inv.getController().setAttr("username", loginUserInfo.getUsername());

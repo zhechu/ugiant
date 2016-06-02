@@ -12,9 +12,9 @@ var Login = function () {
 	                password: {
 	                    required: true
 	                },
-	                captcha: {
+	                /*captcha: {
 	                	required: true
-	                },
+	                },*/
 	                remember: {
 	                    required: false
 	                }
@@ -26,10 +26,10 @@ var Login = function () {
 	                },
 	                password: {
 	                    required: "密码不能为空."
-	                },
+	                }/*,
 	                captcha: {
 	                	required: "验证码不能为空."
-	                }
+	                }*/
 	            },
 
 	            invalidHandler: function (event, validator) { //display error alert on form submit   

@@ -27,13 +27,12 @@ public class UserMenuBtnAllInterceptor extends BaseInterceptor {
 			}
 			TpbMenu menu = SystemService.service.findMenuByLinkUrl(uri);
 			if(menu != null){
-				LoginUserInfo loginUserInfo = (LoginUserInfo) ai.getController().getSession().getAttribute(SessionAttriKey.LOGINUSERINFO);
+				LoginUserInfo loginUserInfo = (LoginUserInfo) ai.getController().getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
 				List<Record> list = SystemService.service.findNormalRoleMenuBtnByParams(menu.getInt("id"), loginUserInfo.getRoleIds());
 				ai.getController().setAttr("btnList", list);
 			}
 		}
 		ai.invoke();
-		
 	}
 
 }

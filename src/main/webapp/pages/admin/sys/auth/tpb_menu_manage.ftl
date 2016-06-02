@@ -13,7 +13,6 @@
 	</li>
 	<li>
 		<a href="javascript:void(0)">菜单管理</a>
-		<i class="fa fa-circle"></i>
 	</li>
 </ul>
 <div class="page-content-inner">
@@ -59,6 +58,10 @@ jQuery(function() {
 								toEdit();
 							<#elseif btn.btn_code == 'forbidden'>
 								forbidden();
+							<#elseif btn.btn_code == 'normal'>
+								normal();
+							<#elseif btn.btn_code == 'delete'>
+								del();
 							</#if>
 						}
 					}
@@ -109,12 +112,11 @@ jQuery(function() {
 			align : 'center',
 			width : '8%',
 			formatter: function(value, row, index){
-				/* getConstant("flag", value, function(err, data) {
-					if (err) {
-						return value;
-					}
-					return data;
-				}); */
+				if (value == 1) {
+					return "正常";
+				} else if (value == 2) {
+					return "禁用";
+				}
 				return value;
 			}
 		}, {
@@ -131,24 +133,75 @@ jQuery(function() {
 	});
 });
 
+// 添加
 function toAdd(){
-	window.location.href = "/admin/sys_authority_menu/toAdd";
+	window.location.href = "/admin/sys_auth_menu/toAdd";
 }
 
+// 编辑
 function toEdit(){
 	var row = $('#grid').treegrid('getSelected');
 	if(row){
-		window.location.href = "/admin/sys_authority_menu/toAdd?id="+row.id;
+		window.location.href = "/admin/sys_auth_menu/toAdd?id="+row.id;
 	}else{
 		alert("请选择要操作的数据");
 	}
 }
 
+// 禁用
 function forbidden(){
 	var row = $('#grid').treegrid('getSelected');
 	if(row){
 		$.ajax({
-			url : '/admin/sys_authority_menu/forbidden',
+			url : '/admin/sys_auth_menu/forbidden',
+			data : {
+				id : row.id
+			},
+			dataType : 'json',
+			type : 'post',
+			success : function(json) {
+				if (json.success) {
+					window.location.reload();
+				} else {
+					alert(json.msg);
+				}
+			}
+		});
+	}else{
+		alert("请选择要操作的数据");
+	}
+}
+
+// 启用
+function normal(){
+	var row = $('#grid').treegrid('getSelected');
+	if(row){
+		$.ajax({
+			url : '/admin/sys_auth_menu/forbidden',
+			data : {
+				id : row.id
+			},
+			dataType : 'json',
+			type : 'post',
+			success : function(json) {
+				if (json.success) {
+					window.location.reload();
+				} else {
+					alert(json.msg);
+				}
+			}
+		});
+	}else{
+		alert("请选择要操作的数据");
+	}
+}
+
+// 删除
+function del(){
+	var row = $('#grid').treegrid('getSelected');
+	if(row){
+		$.ajax({
+			url : '/admin/sys_auth_menu/forbidden',
 			data : {
 				id : row.id
 			},

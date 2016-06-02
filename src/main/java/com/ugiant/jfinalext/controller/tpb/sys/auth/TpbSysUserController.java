@@ -38,7 +38,7 @@ public class TpbSysUserController extends BaseController {
 		try {
 			String old_password = this.getPara("old_password");
 			String new_password = this.getPara("new_password");
-			LoginUserInfo loginUserInfo = (LoginUserInfo) this.getSession().getAttribute(SessionAttriKey.LOGINUSERINFO);
+			LoginUserInfo loginUserInfo = (LoginUserInfo) this.getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
 			if (loginUserInfo == null) {
 				throw new MyException("用户未登陆");
 			}
@@ -51,7 +51,7 @@ public class TpbSysUserController extends BaseController {
 			rm.msgFailed(me.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
-			rm.msgFailed(MyMessage.sysExceptionMsg);
+			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
 		}
 		this.renderJson(rm);
 	}

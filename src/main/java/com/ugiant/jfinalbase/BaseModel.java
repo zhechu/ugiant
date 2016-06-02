@@ -10,7 +10,7 @@ public abstract class  BaseModel<M extends Model<?>> extends Model<M> {
 	private static final long serialVersionUID = -4447796116787868438L;
 
 	/**
-	 * 判断是否存在
+	 * 根据id判断是否存在此菜单
 	 * @param id
 	 * @return
 	 */

@@ -7,6 +7,6 @@ package com.ugiant.exception;
  */
 public class MyMessage {
 
-	public final static String sysExceptionMsg = "系统异常，请联系管理员";
+	public final static String SYS_EXCEPTION_MSG = "系统异常，请联系管理员";
 	
 }

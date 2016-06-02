@@ -6,8 +6,10 @@ import java.util.List;
 
 import com.jfinal.aop.Before;
 import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.ugiant.constant.base.AppConstant;
 import com.ugiant.constant.tpb.Flag;
 import com.ugiant.constant.tpb.Status;
 import com.ugiant.exception.MyException;
@@ -29,7 +31,21 @@ import com.ugiant.util.SecureUtil;
  */
 public class SystemService {
 	
-	public static final SystemService service = new SystemService();
+	public static final SystemService service = new SystemService(); // 系统管理业务单例
+	
+	private TpbDepartmentUser tpbDepartmentDao = TpbDepartmentUser.dao; // 部门 dao
+	
+	private TpbRoleUser tpbRoleUserDao = TpbRoleUser.dao; // 角色用户 dao
+	
+	private TpbMenu tpbMenuDao = TpbMenu.dao; // 菜单 dao
+	
+	private TpbRoleMenu tpbRoleMenuDao = TpbRoleMenu.dao; // 角色菜单 dao
+	
+	private TpbSysUser tpbSysUserDao = TpbSysUser.dao; // 后台用户 dao
+	
+	private TpbRoleMenuBtn tpbRoleMenuBtnDao = TpbRoleMenuBtn.dao; // 角色菜单按钮 dao
+	
+	private SysConstant sysConstantDao = SysConstant.dao; // 常量 dao
 	
 	/**
 	 * 根据用户 id 获取部门信息
@@ -37,7 +53,7 @@ public class SystemService {
 	 * @return
 	 */
 	public Record findDepartmentByUserId(Integer userId){
-		return TpbDepartmentUser.dao.findDepartmentByUserId(userId);
+		return tpbDepartmentDao.findDepartmentByUserId(userId);
 	}
 	
 	/**
@@ -47,7 +63,7 @@ public class SystemService {
 	 */
 	public String findRoleIdsByUserId(Integer userId){
 		StringBuilder sb= new StringBuilder();
-		List<Record> list = TpbRoleUser.dao.findRoleByUserId(userId);
+		List<Record> list = tpbRoleUserDao.findRoleByUserId(userId);
 		int len = list.size();
 		for (int i=0; i<len; i++) {
 			Record record = list.get(i);
@@ -65,7 +81,7 @@ public class SystemService {
 	 * @return
 	 */
 	public String findMenuParentIdsByLinkUrl(String linkUrl) {
-		TpbMenu menu = TpbMenu.dao.findByLinkUrl(linkUrl);
+		TpbMenu menu = tpbMenuDao.findByLinkUrl(linkUrl);
 		if (menu == null) {
 			return null;
 		}
@@ -73,7 +89,7 @@ public class SystemService {
 		idList.add(menu.getInt("id"));
 		Integer parentId = menu.getInt("parent_id");
 		while(parentId != 0){
-			TpbMenu parent = TpbMenu.dao.findById(parentId);
+			TpbMenu parent = tpbMenuDao.findById(parentId);
 			if (parent != null) {
 				idList.add(parentId);
 				parentId = parent.getInt("parent_id");
@@ -88,7 +104,7 @@ public class SystemService {
 	 * @return
 	 */
 	public TpbMenu findMenuByLinkUrl(String linkUrl) {
-		return TpbMenu.dao.findByLinkUrl(linkUrl);
+		return tpbMenuDao.findByLinkUrl(linkUrl);
 	}
 	
 	/**
@@ -98,7 +114,7 @@ public class SystemService {
 	 * @return
 	 */
 	public List<Record> findMenuByParentIdAndRoleIds(Integer parentId, String roleIds) {
-		return TpbRoleMenu.dao.findMenuByParams(parentId, roleIds);
+		return tpbRoleMenuDao.findMenuByParams(parentId, roleIds);
 	}
 	
 	/**
@@ -108,7 +124,7 @@ public class SystemService {
 	 * @return
 	 */
 	public List<Record> findMenuByParentIdAndRoleIds(Integer parentId) {
-		return TpbRoleMenu.dao.findMenuByParams(parentId, null);
+		return tpbRoleMenuDao.findMenuByParams(parentId, null);
 	}
 	
 	/**
@@ -124,7 +140,7 @@ public class SystemService {
 			throw new MyException("参数有误");
 		}
 		
-		TpbSysUser sysUser = TpbSysUser.dao.findByUsername(username, null);
+		TpbSysUser sysUser = tpbSysUserDao.findByUsername(username, null);
 		
 		if (sysUser == null) {
 			throw new MyException("用户名不存在");
@@ -175,7 +191,7 @@ public class SystemService {
 	 * @return
 	 */
 	public List<Record> findNormalRoleMenuBtnByParams(Integer menuId, String roleIds){
-		return TpbRoleMenuBtn.dao.findByParams(menuId, roleIds, Status.NORMAL);
+		return tpbRoleMenuBtnDao.findByParams(menuId, roleIds, Status.NORMAL);
 	}
 	
 	/**
@@ -185,7 +201,7 @@ public class SystemService {
 	 * @return
 	 */
 	public List<Record> findRoleMenuBtnByParams(Integer menuId, String roleIds){
-		return TpbRoleMenuBtn.dao.findByParams(menuId, roleIds, null);
+		return tpbRoleMenuBtnDao.findByParams(menuId, roleIds, null);
 	}
 	
 	/**
@@ -205,9 +221,9 @@ public class SystemService {
 	 * @param parentId 菜单父 id
 	 * @return
 	 */
-	private static String menuTreeJson(Integer parentId) {
+	private String menuTreeJson(Integer parentId) {
 		StringBuilder json = new StringBuilder();
-		List<TpbMenu> menuList = TpbMenu.dao.findByParentId(parentId);
+		List<TpbMenu> menuList = tpbMenuDao.findByParentId(parentId);
 		if(menuList != null){
 			TpbMenu tempMenu = null;
 			int len = menuList.size();
@@ -246,7 +262,7 @@ public class SystemService {
 	 * @return
 	 */
 	public List<SysConstant> findConstantByType(String type) {
-		return SysConstant.dao.findByType(type);
+		return sysConstantDao.findByType(type);
 	}
 	
 	/**
@@ -256,6 +272,167 @@ public class SystemService {
 	 * @return
 	 */
 	public SysConstant findByTypeAndValue(String type, Integer value) {
-		return SysConstant.dao.findByTypeAndValue(type, value);
+		return sysConstantDao.findByTypeAndValue(type, value);
 	}
+	
+	/**
+	 * 根据id判断是否存在此菜单
+	 * @param id
+	 * @return
+	 */
+	public boolean isMenuExists(Integer id){
+		return tpbMenuDao.isExists(id);
+	}
+	
+	/**
+	 * 根据 id 获取菜单
+	 * @param id
+	 * @return
+	 */
+	public TpbMenu findMenuById(Integer id) {
+		return tpbMenuDao.findById(id);
+	}
+	
+	/**
+	 * 菜单树 json字符串
+	 * @param parentId 菜单父 id
+	 * @param roleIds 角色 ids
+	 * @param type 菜单类型
+	 * @return
+	 */
+	public String getMenuJson(Integer parentId, String roleIds, Integer type) {
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+		json.append(getMenu(parentId,roleIds,type));
+		json.append("]");
+		return json.toString();
+	}
+	
+	/**
+	 * 递归
+	 * @param parentId 菜单父 id
+	 * @param roleIds 角色 ids
+	 * @param type 菜单类型
+	 * @return
+	 */
+	private String getMenu(Integer parentId,String roleIds, Integer type){
+		StringBuilder json = new StringBuilder();
+		StringBuilder sql = new StringBuilder();
+		sql.append(" select a.* from tpb_menu a");
+		sql.append(" where a.status = " + Status.NORMAL);
+		if(parentId != null){
+			sql.append(" and a.parent_id = " + parentId);
+		}
+		if(StrKit.notBlank(roleIds)){
+			sql.append(" and exists (select 1 from tpb_role_menu b where a.id = b.menu_id and b.role_id in ( ");
+			sql.append(roleIds);
+			sql.append("))");
+		}
+		if(type != null){
+			sql.append(" and a.type = " + type);
+		}
+		sql.append(" order by sort_no");
+		List<Record> list = Db.find(sql.toString());
+		if(list != null){
+			int size = list.size();
+			Record r = null;
+			for(int i=0; i<size; i++){ 
+				r = list.get(i);
+				json.append("{");
+				json.append("\"id\":").append(r.getInt("id")).append(",");
+				json.append("\"text\":\"").append(r.getStr("name")).append("\",");
+				json.append("\"state\":\"open\"").append(",");
+				json.append("\"attributes\" : {");
+				if(StrKit.notBlank(r.getStr("link_url"))){
+					json.append("\"url\":\"").append(r.getStr("link_url")).append("\"");
+				}
+				json.append("}");
+				if(r.getInt("is_parent") == 1){ // 若是父节点，则递归
+					json.append(",");
+					json.append("\"children\" : [");
+					json.append(getMenu(r.getInt("id"),roleIds,type));
+					json.append("]");
+				}
+				if(i == size-1){
+					json.append("}");
+				}else {
+					json.append("},");
+				}
+			}
+		}
+		return json.toString();
+	}
+	
+	/**
+	 * 添加菜单
+	 * @param menu 菜单 model
+	 * @param currentUserId 当前用户 id 
+	 */
+	@Before(Tx.class)
+	public void addMenu(TpbMenu menu, Integer currentUserId) {
+		menu.set("status", Status.NORMAL);
+		Integer parentId = menu.getInt("parent_id");
+		if (parentId != null && parentId > 0) { // 非初始菜单
+			TpbMenu parent = tpbMenuDao.findById(parentId);
+			if(parent == null){
+				throw new MyException("父菜单不存在");
+			}
+			menu.set("menu_level", parent.getInt("menu_level")+1);
+			menu.set("is_parent", 0); // 非父节点
+			menu.set("created", new Date());
+			menu.set("create_user_id", 1);
+			if (menu.save()) {
+				throw new MyException("操作失败");
+			}
+			if (parent.getInt("is_parent") == 0) { // 更新父节点的是否父节点标记
+				parent.set("is_parent", 1);
+				parent.update();
+			}
+		} else { // 初始菜单
+			menu.set("parent_id", 0);
+			menu.set("menu_level", 1);
+			menu.set("is_parent", 0);
+			menu.set("created", new Date());
+			menu.set("create_user_id", currentUserId);
+			if (!menu.save()) {
+				throw new MyException("操作菜单失败");
+			}
+		}
+		// 添加菜单成功后，分配菜单权限给超级管理员
+		TpbRoleMenu roleMenu = new TpbRoleMenu();
+		roleMenu.set("role_id", AppConstant.ADMIN_ROLE_ID)
+		.set("menu_id", menu.getInt("id"));
+		if (!roleMenu.save()) {
+			throw new MyException("分配超级管理员菜单权限失败");
+		}
+	}
+	
+	/**
+	 * 更新菜单
+	 * @param id 菜单id
+	 * @param code 菜单编码
+	 * @param name 菜单名称
+	 * @param link_url 菜单URL
+	 * @param sort_no 菜单排序值
+	 * @param icon_cls 菜单样式
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateMenu(Integer id, String code, String name, String link_url, Integer sort_no, String icon_cls, Integer currentUserId) {
+		TpbMenu menu = tpbMenuDao.findById(id);
+		if(menu == null){
+			throw new MyException("参数错误");
+		}
+		menu.set("code", code)
+			.set("name", name)
+			.set("link_url", link_url)
+			.set("sort_no", sort_no)
+			.set("icon_cls", icon_cls)
+			.set("updated", new Date())
+			.set("last_update_user_id", currentUserId);
+		if (!menu.update()) {
+			throw new MyException("更新失败");
+		}
+	}
+	
 }

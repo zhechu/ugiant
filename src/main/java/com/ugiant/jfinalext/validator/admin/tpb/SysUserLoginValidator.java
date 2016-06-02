@@ -28,14 +28,14 @@ public class SysUserLoginValidator extends BaseValidator {
 		}
 		
 		// 验证码验证
-		String cryptCaptcha = c.getPara("captcha");
+		/*String cryptCaptcha = c.getPara("captcha");
 		if (StrKit.notBlank(cryptCaptcha)) {
 			if (!CaptchaRender.validate(c, CryptUtil.getFromBase64(cryptCaptcha))) {
 				this.addError("msg", "验证码不正确");
 			}
 		} else {
 			this.addError("msg", "验证码未填写");
-		}
+		}*/
 	}
 
 	@Override

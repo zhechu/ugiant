@@ -1,5 +1,6 @@
 package com.ugiant.jfinalext.model.tpb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ugiant.constant.tpb.Status;
@@ -16,13 +17,6 @@ public class TpbMenu extends BaseModel<TpbMenu> {
 	private static final long serialVersionUID = 9047222044715416868L;
 	
 	public static final TpbMenu dao = new TpbMenu();
-
-	@Override
-	public TpbMenu findById(Object idValue) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select a.* from tpb_menu a where a.id = ? ");
-		return TpbMenu.dao.findFirst(sql.toString(), idValue);
-	}
 
 	/**
 	 * 根据菜单链接获取菜单信息
@@ -45,12 +39,14 @@ public class TpbMenu extends BaseModel<TpbMenu> {
 	 * @return
 	 */
 	public List<TpbMenu> findByParentId(Integer parentId) {
+		List<TpbMenu> menuList = new ArrayList<TpbMenu>();
 		if (parentId == null) {
-			return null;
+			return menuList;
 		}
 		StringBuilder sql = new StringBuilder();
 		sql.append("select a.* from tpb_menu a where a.parent_id = ? order by a.sort_no");
-		return TpbMenu.dao.find(sql.toString(), parentId);
+		menuList = TpbMenu.dao.find(sql.toString(), parentId);
+		return menuList;
 	}
 	
 }
