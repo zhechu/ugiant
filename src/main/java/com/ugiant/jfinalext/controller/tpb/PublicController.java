@@ -7,15 +7,14 @@ import java.util.Map;
 
 import com.jfinal.aop.Before;
 import com.jfinal.kit.StrKit;
-import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.render.CaptchaRender;
-import com.ugiant.constant.tpb.SessionAttriKey;
+import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.exception.MyException;
 import com.ugiant.exception.MyMessage;
 import com.ugiant.jfinalbase.BaseController;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
-import com.ugiant.jfinalext.model.tpb.SysConstant;
+import com.ugiant.jfinalext.model.tpb.TpbSysConstant;
 import com.ugiant.jfinalext.model.tpb.TpbSysUser;
 import com.ugiant.jfinalext.service.tpb.SystemService;
 import com.ugiant.jfinalext.validator.admin.tpb.SysUserLoginValidator;
@@ -26,6 +25,8 @@ import com.ugiant.jfinalext.validator.admin.tpb.SysUserLoginValidator;
  *
  */
 public class PublicController extends BaseController {
+
+	private SystemService systemService = SystemService.service; // 系统管理业务 service
 	
 	/**
 	 * 进入登录页
@@ -59,20 +60,20 @@ public class PublicController extends BaseController {
 			String username = this.getPara("username");
 			String cryptPassword = this.getPara("password");
 			// 登录验证
-			TpbSysUser sysUser = SystemService.service.login(username, cryptPassword);
+			TpbSysUser sysUser = systemService.login(username, cryptPassword);
 			if (sysUser == null) {
 				throw new MyException("登录失败");
 			}
 			rm.msgSuccess("登录成功");
 			
 			Integer userId = sysUser.getInt("id");
-			Record dept = SystemService.service.findDepartmentByUserId(userId);
-			String roleIds = SystemService.service.findRoleIdsByUserId(userId);
+			//Record dept = systemService.findDepartmentByUserId(userId);
+			String roleIds = systemService.findRoleIdsByUserId(userId);
 			
 			LoginUserInfo loginUserInfo = new LoginUserInfo();
 			loginUserInfo.setUserId(sysUser.getInt("id"));
 			loginUserInfo.setUsername(sysUser.getStr("username"));
-			loginUserInfo.setDeptId(dept.getInt("id"));
+			//loginUserInfo.setDeptId(dept.getInt("id"));
 			loginUserInfo.setRoleIds(roleIds);
 			
 			// 将登录用户信息存入 session
@@ -97,9 +98,9 @@ public class PublicController extends BaseController {
 			if (StrKit.notBlank(type) && value==null) { // 只根据类型
 				List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 				Map<String, Object> data = null;
-				List<SysConstant> constantList = SystemService.service.findConstantByType(type);
+				List<TpbSysConstant> constantList = systemService.findConstantByType(type);
 				if (constantList != null) {
-					SysConstant constant = null;
+					TpbSysConstant constant = null;
 					int len = constantList.size();
 					for (int i = 0; i < len; i++) {
 						data = new HashMap<String, Object>();
@@ -111,8 +112,8 @@ public class PublicController extends BaseController {
 				}
 				rm.setData(dataList);
 			} else { // 根据类型和值获取 label
-				SysConstant constant = SystemService.service.findByTypeAndValue(type, value);
-				rm.setData(constant.getStr("label"));
+				TpbSysConstant constant = systemService.findByTypeAndValue(type, value);
+				rm.setData(constant);
 			}
 			rm.msgSuccess("获取常量成功");
 		} catch (MyException me) {

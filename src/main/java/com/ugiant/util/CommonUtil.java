@@ -1,12 +1,12 @@
 package com.ugiant.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 
 public class CommonUtil {
 	/**
@@ -26,17 +26,27 @@ public class CommonUtil {
 	 * @return
 	 */
 	public static final <T> String ArrayJoin(T[] arr, String split){
-		if(arr == null){
+		return ArrayJoin(Arrays.asList(arr), split);
+	}
+	
+	/**
+	 * 数据join方法
+	 * @param list
+	 * @param split
+	 * @return
+	 */
+	public static final <T> String ArrayJoin(List<T> list, String split) {
+		if(list == null){
 			return null;
 		}
-		if(arr.length == 0){
+		if(list.size() == 0){
 			return "";
 		}
 		if(split == null){
 			split = "";
 		}
 		StringBuilder sb = new StringBuilder();
-		for(T t : arr){
+		for(T t : list){
 			sb.append(t.toString()).append(split);
 		}
 		
@@ -112,10 +122,8 @@ public class CommonUtil {
 		return list;
 	}
 	
-	public static void main(String[] args) throws Base64DecodingException{
-//		String regex = "^([0-9]{1,9}[,])*([0-9]{1,9})";
-//		String telephonePattern = "^(\\d{3,4}-?)?\\d{8}$";
-//		boolean flag = ValidatorUtil.validateStr("05-52578230", telephonePattern);
-//		System.out.println(flag);
+	public static void main(String[] args) {
+		Integer[] array = new Integer[]{1,2,3};
+		System.out.println(ArrayJoin(array, ","));
 	}
 }

@@ -1,9 +1,11 @@
 package com.ugiant.jfinalext.model.tpb;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import com.ugiant.constant.tpb.Status;
+import com.ugiant.constant.base.Status;
+import com.ugiant.exception.MyException;
 import com.ugiant.jfinalbase.BaseModel;
 import com.ugiant.util.SqlUtil;
 
@@ -47,6 +49,55 @@ public class TpbMenu extends BaseModel<TpbMenu> {
 		sql.append("select a.* from tpb_menu a where a.parent_id = ? order by a.sort_no");
 		menuList = TpbMenu.dao.find(sql.toString(), parentId);
 		return menuList;
+	}
+	
+	/**
+	 * 更新菜单
+	 * @param id 菜单 id
+	 * @param status 菜单状态
+	 * @param code 菜单编码
+	 * @param name 菜单名称
+	 * @param link_url 菜单URL
+	 * @param sort_no 菜单排序值
+	 * @param icon_cls 菜单样式
+	 * @param currentUserId 当前用户 id
+	 */
+	public void update(Integer id, Integer status, String code, String name, String link_url, Integer sort_no, String icon_cls, Integer currentUserId) {
+		TpbMenu menu = findById(id);
+		if(menu == null){
+			throw new MyException("参数错误");
+		}
+		if (status != null) {
+			menu.set("status", status);
+		}
+		if (code != null) {
+			menu.set("code", code);
+		}
+		if (name != null) {
+			menu.set("name", name);
+		}
+		if (link_url != null) {
+			menu.set("link_url", link_url);
+		}
+		if (sort_no != null) {
+			menu.set("sort_no", sort_no);
+		}
+		if (icon_cls != null) {
+			menu.set("icon_cls", icon_cls);
+		}
+		menu.set("updated", new Date())
+			.set("last_update_user_id", currentUserId);
+		if (!menu.update()) {
+			throw new MyException("更新失败");
+		}
+	}
+	
+	public void update(Integer id, String code, String name, String link_url, Integer sort_no, String icon_cls, Integer currentUserId) {
+		update(id, null, code, name, link_url, sort_no, icon_cls, currentUserId);
+	}
+	
+	public void update(Integer id, Integer status, Integer currentUserId) {
+		update(id, status, null, null, null, null, null, currentUserId);
 	}
 	
 }

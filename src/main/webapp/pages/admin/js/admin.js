@@ -177,8 +177,25 @@ getConstant("flag", 1, function(err, data) {
 });
 */
 
-
-
+// 列表常量获取
+function listConstant(target, type, value) {
+	// 根据类型获取列表
+	getConstant(type, function(err, data) {
+		if (err) {
+			alert(err);
+			return;
+		}
+		var selected = "";
+		var options = "<option  value=''>== 请选择 ==</option>";
+		$.each(data, function(index, constant) {
+			if (constant.value == value) {
+				selected = "selected";
+			}
+			options += "<option  value='"+constant.value+"' "+selected+">"+constant.label+"</option>";
+		});//each
+		$(target).append(options);	
+	});
+}//list
 
 
 

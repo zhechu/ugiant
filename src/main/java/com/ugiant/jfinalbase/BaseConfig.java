@@ -14,13 +14,14 @@ import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.c3p0.C3p0Plugin;
 import com.jfinal.render.ViewType;
-import com.ugiant.constant.tpb.SessionAttriKey;
-import com.ugiant.constant.tpb.Table;
+import com.ugiant.constant.base.SessionAttriKey;
+import com.ugiant.constant.base.Table;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
-import com.ugiant.jfinalext.model.tpb.SysConstant;
+import com.ugiant.jfinalext.model.tpb.TpbSysConstant;
 import com.ugiant.jfinalext.model.tpb.TpbDepartment;
 import com.ugiant.jfinalext.model.tpb.TpbDepartmentUser;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;
+import com.ugiant.jfinalext.model.tpb.TpbMenuBtn;
 import com.ugiant.jfinalext.model.tpb.TpbRole;
 import com.ugiant.jfinalext.model.tpb.TpbRoleMenu;
 import com.ugiant.jfinalext.model.tpb.TpbRoleMenuBtn;
@@ -58,13 +59,14 @@ public class BaseConfig extends JFinalConfig {
 		arp.setShowSql(true);
 		me.add(arp);
 		
-		arp.addMapping(Table.SYS_CONSTANT, SysConstant.class);
+		arp.addMapping(Table.SYS_CONSTANT, TpbSysConstant.class);
 		arp.addMapping(Table.TPB_SYS_USER, TpbSysUser.class);
 		arp.addMapping(Table.TPB_DEPARTMENT, TpbDepartment.class);
 		arp.addMapping(Table.TPB_DEPARTMENT_USER, TpbDepartmentUser.class);
 		arp.addMapping(Table.TPB_ROLE, TpbRole.class);
 		arp.addMapping(Table.TPB_ROLE_USER, TpbRoleUser.class);
 		arp.addMapping(Table.TPB_MENU, TpbMenu.class);
+		arp.addMapping(Table.TPB_MENU_BTN, TpbMenuBtn.class);
 		arp.addMapping(Table.TPB_ROLE_MENU, TpbRoleMenu.class);
 		arp.addMapping(Table.TPB_ROLE_MENU_BTN, TpbRoleMenuBtn.class);
 	}

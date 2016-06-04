@@ -5,7 +5,8 @@ import java.util.List;
 import com.jfinal.aop.Before;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
-import com.ugiant.constant.tpb.SessionAttriKey;
+import com.ugiant.constant.base.SessionAttriKey;
+import com.ugiant.constant.base.Status;
 import com.ugiant.constant.tpb.TpbMenuType;
 import com.ugiant.exception.MyException;
 import com.ugiant.exception.MyMessage;
@@ -16,6 +17,7 @@ import com.ugiant.jfinalext.model.base.ResponseModel;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;
 import com.ugiant.jfinalext.service.tpb.SystemService;
 import com.ugiant.jfinalext.validator.admin.tpb.TpbMenuValidator;
+import com.ugiant.jfinalext.validator.common.IdValidator;
 
 /**
  * 后台菜单管理 控制器
@@ -69,8 +71,8 @@ public class TpbMenuController extends BaseController {
 	 */
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
-		if(systemService.isMenuExists(id)){
-			TpbMenu menu = systemService.findMenuById(id);
+		TpbMenu menu = systemService.findMenuById(id);
+		if (menu != null) {
 			this.setAttr("tpbMenu", menu);
 		}
 		this.render("tpb_menu_add.ftl");
@@ -94,9 +96,6 @@ public class TpbMenuController extends BaseController {
 			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
 			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
 			TpbMenu menu = this.getModel(TpbMenu.class);
-			if(menu == null){
-				throw new MyException("操作失败");
-			}
 			Integer menuId = menu.getInt("id");
 			if (menuId != null) { // 更新
 				systemService.updateMenu(menuId, menu.getStr("code"), menu.getStr("name"), menu.getStr("link_url"), menu.getInt("sort_no"), menu.getStr("icon_cls"), currentUserId);
@@ -104,6 +103,67 @@ public class TpbMenuController extends BaseController {
 				systemService.addMenu(menu, currentUserId);
 			}
 			rm.msgSuccess("操作菜单成功");
+		} catch (MyException me) {
+			rm.msgFailed(me.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
+		}
+		this.renderJson(rm);
+	}
+
+	/**
+	 * 禁用
+	 */
+	@Before(IdValidator.class)
+	public void forbidden(){
+		ResponseModel rm = new ResponseModel();
+		try {
+			Integer id = this.getParaToInt("id");
+			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+			systemService.updateMenuStatus(id, Status.FORBIDDEN, currentUserId);
+			rm.msgSuccess("禁用成功");
+		} catch (MyException me) {
+			rm.msgFailed(me.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
+		}
+		this.renderJson(rm);
+	}
+	
+	/**
+	 * 启用
+	 */
+	@Before(IdValidator.class)
+	public void normal(){
+		ResponseModel rm = new ResponseModel();
+		try {
+			Integer id = this.getParaToInt("id");
+			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+			systemService.updateMenuStatus(id, Status.NORMAL, currentUserId);
+			rm.msgSuccess("禁用成功");
+		} catch (MyException me) {
+			rm.msgFailed(me.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
+		}
+		this.renderJson(rm);
+	}
+	
+	/**
+	 * 删除
+	 */
+	@Before(IdValidator.class)
+	public void remove(){
+		ResponseModel rm = new ResponseModel();
+		try {
+			Integer id = this.getParaToInt("id");
+			systemService.deleteMenu(id);
+			rm.msgSuccess("删除成功");
 		} catch (MyException me) {
 			rm.msgFailed(me.getMessage());
 		} catch (Exception e) {

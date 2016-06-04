@@ -10,19 +10,22 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.ugiant.constant.base.AppConstant;
-import com.ugiant.constant.tpb.Flag;
-import com.ugiant.constant.tpb.Status;
+import com.ugiant.constant.base.Flag;
+import com.ugiant.constant.base.Status;
 import com.ugiant.exception.MyException;
-import com.ugiant.jfinalext.model.tpb.SysConstant;
 import com.ugiant.jfinalext.model.tpb.TpbDepartmentUser;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;
+import com.ugiant.jfinalext.model.tpb.TpbMenuBtn;
+import com.ugiant.jfinalext.model.tpb.TpbRole;
 import com.ugiant.jfinalext.model.tpb.TpbRoleMenu;
 import com.ugiant.jfinalext.model.tpb.TpbRoleMenuBtn;
 import com.ugiant.jfinalext.model.tpb.TpbRoleUser;
+import com.ugiant.jfinalext.model.tpb.TpbSysConstant;
 import com.ugiant.jfinalext.model.tpb.TpbSysUser;
 import com.ugiant.util.CommonUtil;
 import com.ugiant.util.CryptUtil;
 import com.ugiant.util.SecureUtil;
+import com.ugiant.util.SysCodeUtil;
 
 /**
  * 后台系统管理 业务类
@@ -41,11 +44,15 @@ public class SystemService {
 	
 	private TpbRoleMenu tpbRoleMenuDao = TpbRoleMenu.dao; // 角色菜单 dao
 	
+	private TpbMenuBtn tpbMenuBtnDao = TpbMenuBtn.dao; // 菜单按钮菜单 dao
+	
 	private TpbSysUser tpbSysUserDao = TpbSysUser.dao; // 后台用户 dao
 	
 	private TpbRoleMenuBtn tpbRoleMenuBtnDao = TpbRoleMenuBtn.dao; // 角色菜单按钮 dao
 	
-	private SysConstant sysConstantDao = SysConstant.dao; // 常量 dao
+	private TpbSysConstant sysConstantDao = TpbSysConstant.dao; // 常量 dao
+	
+	private TpbRole tpbRoleDao = TpbRole.dao; // 角色 dao
 	
 	/**
 	 * 根据用户 id 获取部门信息
@@ -261,7 +268,7 @@ public class SystemService {
 	 * @param type 常量类型
 	 * @return
 	 */
-	public List<SysConstant> findConstantByType(String type) {
+	public List<TpbSysConstant> findConstantByType(String type) {
 		return sysConstantDao.findByType(type);
 	}
 	
@@ -271,7 +278,7 @@ public class SystemService {
 	 * @param value 值
 	 * @return
 	 */
-	public SysConstant findByTypeAndValue(String type, Integer value) {
+	public TpbSysConstant findByTypeAndValue(String type, Integer value) {
 		return sysConstantDao.findByTypeAndValue(type, value);
 	}
 	
@@ -291,6 +298,15 @@ public class SystemService {
 	 */
 	public TpbMenu findMenuById(Integer id) {
 		return tpbMenuDao.findById(id);
+	}
+	
+	/**
+	 * 根据 id 获取菜单按钮
+	 * @param id
+	 * @return
+	 */
+	public TpbMenuBtn findMenuBtnById(Integer id) {
+		return tpbMenuBtnDao.findById(id);
 	}
 	
 	/**
@@ -347,7 +363,7 @@ public class SystemService {
 					json.append("\"url\":\"").append(r.getStr("link_url")).append("\"");
 				}
 				json.append("}");
-				if(r.getInt("is_parent") == 1){ // 若是父节点，则递归
+				if(r.getInt("is_parent") == Flag.YES){ // 若是父节点，则递归
 					json.append(",");
 					json.append("\"children\" : [");
 					json.append(getMenu(r.getInt("id"),roleIds,type));
@@ -419,20 +435,306 @@ public class SystemService {
 	 */
 	@Before(Tx.class)
 	public void updateMenu(Integer id, String code, String name, String link_url, Integer sort_no, String icon_cls, Integer currentUserId) {
-		TpbMenu menu = tpbMenuDao.findById(id);
-		if(menu == null){
-			throw new MyException("参数错误");
+		tpbMenuDao.update(id, code, name, link_url, sort_no, icon_cls, currentUserId);
+	}
+	
+	/**
+	 * 更新菜单状态
+	 * @param id 菜单 id
+	 * @param status 菜单状态
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateMenuStatus(Integer id, Integer status, Integer currentUserId) {
+		tpbMenuDao.update(id, status, currentUserId);
+	}
+	
+	/**
+	 * 删除菜单
+	 * @param id 菜单 id
+	 */
+	@Before(Tx.class)
+	public void deleteMenu(Integer id) {
+		// 删除角色菜单关系
+		tpbRoleMenuDao.deleteByMenuId(id);
+		
+		// 找出菜单按钮，删除菜单按钮角色关系
+		List<Record> menuBtnList = tpbMenuBtnDao.findByMenuId(id);
+		List<Integer> menuBtnIds = new ArrayList<Integer>();
+		for (Record menuBtn : menuBtnList) {
+			menuBtnIds.add(menuBtn.getInt("id"));
 		}
-		menu.set("code", code)
-			.set("name", name)
-			.set("link_url", link_url)
-			.set("sort_no", sort_no)
-			.set("icon_cls", icon_cls)
-			.set("updated", new Date())
-			.set("last_update_user_id", currentUserId);
-		if (!menu.update()) {
-			throw new MyException("更新失败");
+		tpbRoleMenuBtnDao.deleteByMenuBtnIds(menuBtnIds);
+		
+		// 删除菜单按钮
+		tpbMenuBtnDao.deleteByIds(menuBtnIds);
+		
+		// 删除菜单
+		tpbMenuDao.deleteById(id);
+	}
+	
+	/**
+	 * 根据菜单获取菜单按钮分页列表
+	 * @param menuId 菜单 id
+	 * @return
+	 */
+	public List<Record> findMenuBtnByMenuId(Integer menuId) {
+		return tpbMenuBtnDao.findByParams(menuId);
+	}
+
+	/**
+	 * 更新菜单按钮
+	 * @param id 菜单 id
+	 * @param btn_name 菜单按钮名称
+	 * @param code 菜单按钮编码
+	 * @param sort_no 菜单按钮排序值
+	 * @param type 菜单按钮类型
+	 * @param icon_cls 菜单按钮样式
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateMenuBtn(Integer id, String btn_name, String code, Integer sort_no, Integer type, String icon_cls, Integer currentUserId) {
+		tpbMenuBtnDao.update(id, btn_name, code, sort_no, type, icon_cls, currentUserId);
+	}
+
+	/**
+	 * 添加菜单按钮
+	 * @param menuBtn 菜单按钮 model
+	 * @param currentUserId 当前用户 id 
+	 */
+	@Before(Tx.class)
+	public void addMenuBtn(TpbMenuBtn menuBtn, Integer currentUserId) {
+		menuBtn.set("status", Status.NORMAL)
+			   .set("created", new Date())
+			   .set("create_user_id", currentUserId);
+		if (!menuBtn.save()) { // 添加失败
+			throw new MyException("添加菜单按钮失败");
 		}
+		// 分配超级管理员新添菜单按钮权限
+		TpbRoleMenuBtn roleMenuBtn = new TpbRoleMenuBtn();
+		roleMenuBtn.set("role_id", AppConstant.ADMIN_ROLE_ID)
+				   .set("menu_id", menuBtn.get("menu_id"))
+				   .set("btn_id", menuBtn.getInt("id"));
+		if (!roleMenuBtn.save()) {
+			throw new MyException("分配超级管理员新添菜单按钮权限失败");
+		}
+	}
+
+	/**
+	 * 更新菜单按钮状态
+	 * @param id 菜单按钮 id
+	 * @param status 菜单按钮状态
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateMenuBtnStatus(Integer id, Integer status, Integer currentUserId) {
+		tpbMenuBtnDao.update(id, status, currentUserId);
+	}
+
+	/**
+	 * 删除菜单按钮
+	 * @param id
+	 */
+	@Before(Tx.class)
+	public void deleteMenuBtn(Integer id) {
+		// 删除角色菜单按钮关系
+		tpbRoleMenuBtnDao.deleteByMenuBtnId(id);
+		
+		// 删除菜单按钮
+		tpbMenuBtnDao.deleteById(id);
+	}
+
+	/**
+	 * 获取角色列表
+	 * @return
+	 */
+	public List<Record> findRole() {
+		return tpbRoleDao.find();
+	}
+
+	/**
+	 * 获取角色
+	 * @param id
+	 * @return
+	 */
+	public TpbRole findRoleById(Integer id) {
+		return tpbRoleDao.findById(id);
+	}
+
+	/**
+	 * 添加角色
+	 * @param role 角色 model
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void addRole(TpbRole role, Integer currentUserId) {
+		role.set("status", Status.NORMAL)
+			.set("code", SysCodeUtil.initRoleCode())
+			.set("created", new Date())
+			.set("create_user_id", currentUserId);
+		if (!role.save()) {
+			throw new MyException("添加角色失败");
+		}
+	}
+
+	/**
+	 * 更新角色
+	 * @param id 角色 id
+	 * @param name 角色名称
+	 * @param description 角色描述
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateRole(Integer id, String name, String description, Integer currentUserId) {
+		tpbRoleDao.update(id, name, description, currentUserId);
+	}
+
+	/**
+	 * 更新角色状态
+	 * @param id 角色 id
+	 * @param status 角色状态
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateRoleStatus(Integer id, Integer status, Integer currentUserId) {
+		tpbRoleDao.update(id, status, currentUserId);
+	}
+
+	/**
+	 * 删除角色
+	 * @param id
+	 */
+	@Before(Tx.class)
+	public void deleteRole(Integer id) {
+		// 删除角色用户关系
+		tpbRoleUserDao.deleteByRoleId(id);
+		
+		// 删除角色菜单关系
+		tpbRoleMenuDao.deleteByRoleId(id);
+		
+		// 删除角色菜单按钮关系
+		tpbRoleMenuBtnDao.deleteByRoleId(id);
+		
+		// 删除角色
+		tpbRoleDao.deleteById(id);
+	}
+
+	/**
+	 * 获取后台用户列表
+	 * @return
+	 */
+	public List<Record> findTpbSysUser() {
+		return tpbSysUserDao.find();
+	}
+
+	/**
+	 * 获取后台用户
+	 * @param id
+	 * @return
+	 */
+	public TpbSysUser findSysUserById(Integer id) {
+		return tpbSysUserDao.findById(id);
+	}
+	
+	/**
+	 * 获取后台用户详细信息
+	 * @param id
+	 * @return
+	 */
+	public Record findSysUserDetailById(Integer id) {
+		return tpbSysUserDao.findSysUserById(id);
+	}
+
+	/**
+	 * 更新后台用户
+	 * @param id 后台用户 id
+	 * @param username 登陆用户名
+	 * @param nickname 昵称
+	 * @param password 加密前的密码
+	 * @param roleIds 角色 ids
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateSysUser(Integer id, String username, String nickname, String password, Integer[] roleIds, Integer currentUserId) {
+		// 检查用户名是否存在
+		TpbSysUser temp = tpbSysUserDao.findById(id);
+		if (temp != null) { 
+			String tempUsername = temp.getStr("username");
+			if (!username.equals(tempUsername)) { // 用户名有更新，则检查用户名是否存在
+				temp = tpbSysUserDao.findByUsername(username);
+				if (temp != null) {
+					throw new MyException("用户名已存在");
+				}
+			}
+		}
+		// 更新后台用户
+		String password_salt = null;
+		if (StrKit.notBlank(password)) { // 密码不为空时，才更新
+			password_salt = SecureUtil.passwdSalt();
+			password = SecureUtil.passwd(password, password_salt);
+		}
+		tpbSysUserDao.update(id, username, nickname, password, password_salt, currentUserId);
+		
+		// 更新用户角色关系
+		// 删除原用户角色关系
+		tpbRoleUserDao.deleteByUserId(id);
+		// 绑定用户角色关系
+		tpbRoleUserDao.add(roleIds, id);
+	}
+
+	/**
+	 * 添加后台用户
+	 * @param sysUser 后台用户 model
+	 * @param password 加密前的密码
+	 * @param roleIds 角色 ids
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void addSysUser(TpbSysUser sysUser, String password, Integer[] roleIds, Integer currentUserId) {
+		// 检查用户名是否存在
+		TpbSysUser temp = tpbSysUserDao.findByUsername(sysUser.getStr("username"));
+		if (temp != null) { 
+			throw new MyException("用户名已存在");
+		}
+		// 添加用户
+		String password_salt = SecureUtil.passwdSalt();
+		password = SecureUtil.passwd(password, password_salt);
+		sysUser.set("password_salt", password_salt)
+			   .set("password", password)
+			   .set("status", Status.NORMAL)
+			   .set("created", new Date())
+			   .set("create_user_id", currentUserId);
+		if (!sysUser.save()) {
+			throw new MyException("添加后台用户失败");
+		}
+		
+		// 绑定用户角色关系
+		Integer sys_user_id = sysUser.getInt("id");
+		tpbRoleUserDao.add(roleIds, sys_user_id);
+	}
+
+	/**
+	 * 更新后台用户状态
+	 * @param id 后台用户 id
+	 * @param status 状态
+	 * @param currentUserId 当前用户 id
+	 */
+	@Before(Tx.class)
+	public void updateSysUserStatus(Integer id, Integer status, Integer currentUserId) {
+		tpbSysUserDao.update(id, status, currentUserId);
+	}
+
+	/**
+	 * 删除后台用户
+	 * @param id
+	 */
+	@Before(Tx.class)
+	public void deleteSysUser(Integer id) {
+		// 删除角色用户关系
+		tpbRoleUserDao.deleteByUserId(id);
+		
+		// 删除后台用户
+		tpbSysUserDao.deleteById(id);
 	}
 	
 }

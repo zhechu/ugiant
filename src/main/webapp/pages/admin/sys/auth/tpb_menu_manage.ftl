@@ -113,9 +113,9 @@ jQuery(function() {
 			width : '8%',
 			formatter: function(value, row, index){
 				if (value == 1) {
-					return "正常";
+					return '<span class="label label-success">正常</span>';
 				} else if (value == 2) {
-					return "禁用";
+					return '<span class="label label-warning">禁用</span>';
 				}
 				return value;
 			}
@@ -177,7 +177,7 @@ function normal(){
 	var row = $('#grid').treegrid('getSelected');
 	if(row){
 		$.ajax({
-			url : '/admin/sys_auth_menu/forbidden',
+			url : '/admin/sys_auth_menu/normal',
 			data : {
 				id : row.id
 			},
@@ -200,8 +200,11 @@ function normal(){
 function del(){
 	var row = $('#grid').treegrid('getSelected');
 	if(row){
+		if(!confirm('您确认要执行禁用操作?')){
+			return;
+		}
 		$.ajax({
-			url : '/admin/sys_auth_menu/forbidden',
+			url : '/admin/sys_auth_menu/remove',
 			data : {
 				id : row.id
 			},

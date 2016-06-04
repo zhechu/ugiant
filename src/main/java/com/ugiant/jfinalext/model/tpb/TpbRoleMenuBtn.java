@@ -1,11 +1,13 @@
 package com.ugiant.jfinalext.model.tpb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.ugiant.jfinalbase.BaseModel;
+import com.ugiant.util.CommonUtil;
 
 /**
  * 角色菜单按钮 model
@@ -44,6 +46,37 @@ public class TpbRoleMenuBtn extends BaseModel<TpbRoleMenuBtn> {
 		StringBuilder orderSql = new StringBuilder();
 		orderSql.append(" order by a.sort_no, a.created");
 		return Db.find(selectSql.append(fromSql).append(whereSql).append(orderSql).toString());
+	}
+	
+
+	/**
+	 * 根据菜单按钮 id 列表删除
+	 * @param menuBtnIds 菜单按钮 id 列表
+	 */
+	public void deleteByMenuBtnIds(List<Integer> menuBtnIds) {
+		if (menuBtnIds==null || menuBtnIds.size()<=0) {
+			return;
+		}
+		String idsStr = CommonUtil.ArrayJoin(menuBtnIds, ",");
+		Db.update("delete from tpb_menu_btn where id in ("+idsStr+")");
+	}
+	
+	/**
+	 * 根据菜单按钮 id 删除
+	 * @param menuBtnId 菜单按钮 id
+	 */
+	public void deleteByMenuBtnId(Integer menuBtnId) {
+		List<Integer> menuBtnIds = new ArrayList<Integer>();
+		menuBtnIds.add(menuBtnId);
+		deleteByMenuBtnIds(menuBtnIds);
+	}
+	
+	/**
+	 * 根据角色 id 删除
+	 * @param roleId 角色 id
+	 */
+	public void deleteByRoleId(Integer roleId) {
+		Db.update("delete from tpb_role_menu_btn where role_id = ?", roleId);
 	}
 	
 }

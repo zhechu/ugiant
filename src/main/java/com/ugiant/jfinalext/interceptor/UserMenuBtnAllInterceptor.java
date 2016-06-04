@@ -6,7 +6,7 @@ import java.util.List;
 import com.jfinal.aop.Invocation;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
-import com.ugiant.constant.tpb.SessionAttriKey;
+import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.jfinalbase.BaseInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;

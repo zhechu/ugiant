@@ -5,7 +5,7 @@ import java.util.List;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
-import com.ugiant.constant.tpb.Status;
+import com.ugiant.constant.base.Status;
 import com.ugiant.jfinalbase.BaseModel;
 import com.ugiant.util.SqlUtil;
 
@@ -39,14 +39,28 @@ public class TpbRoleMenu extends BaseModel<TpbRoleMenu> {
 		whereSql.append(SqlUtil.statusWhere("a", Status.NORMAL)); // 状态过滤
 		String orderSql = " order by a.sort_no ";
 		List<Record> list = Db.find(selectSql + whereSql + orderSql);
-		if(list != null){
-			for (Record r : list){ 
-				if(r.getInt("is_parent") == 1){
-					r.set("children", findMenuByParams(r.getInt("id"), roleIds));
-				}
+		for (Record r : list){ 
+			if(r.getInt("is_parent") == 1){
+				r.set("children", findMenuByParams(r.getInt("id"), roleIds));
 			}
 		}
 		return list;
+	}
+	
+	/**
+	 * 根据菜单 id 删除角色菜单关系
+	 * @param menuId 菜单 id
+	 */
+	public void deleteByMenuId(Integer menuId) {
+		Db.update("delete from tpb_role_menu where menu_id = ?", menuId);
+	}
+	
+	/**
+	 * 根据角色 id 删除角色菜单关系
+	 * @param roleId 角色 id
+	 */
+	public void deleteByRoleId(Integer roleId) {
+		Db.update("delete from tpb_role_menu where role_id = ?", roleId);
 	}
 	
 }

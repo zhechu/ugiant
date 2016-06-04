@@ -10,18 +10,18 @@ import com.ugiant.jfinalbase.BaseModel;
  * @author lingyuwang
  *
  */
-public class SysConstant extends BaseModel<SysConstant> {
+public class TpbSysConstant extends BaseModel<TpbSysConstant> {
 	
 	private static final long serialVersionUID = -2096624295353370241L;
 	
-	public static final SysConstant dao = new SysConstant();
+	public static final TpbSysConstant dao = new TpbSysConstant();
 	
 	/**
 	 * 根据类型获取常量列表
 	 * @param type 常量类型
 	 * @return
 	 */
-	public List<SysConstant> findByType(String type) {
+	public List<TpbSysConstant> findByType(String type) {
 		if (StrKit.isBlank(type)) {
 			return null;
 		}
@@ -36,7 +36,7 @@ public class SysConstant extends BaseModel<SysConstant> {
 	 * @param value 值
 	 * @return
 	 */
-	public SysConstant findByTypeAndValue(String type, Integer value) {
+	public TpbSysConstant findByTypeAndValue(String type, Integer value) {
 		if (StrKit.isBlank(type) || value==null) {
 			return null;
 		}
