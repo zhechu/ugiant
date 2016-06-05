@@ -8,6 +8,7 @@ import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbMenuBtnController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbMenuController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbRoleController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbRoleMenuController;
+import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbSysConstantController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbSysUserController;
 
 /**
@@ -41,6 +42,8 @@ public class AdminRoute extends BaseRoute {
 		this.add("/admin/sys_auth_role", TpbRoleController.class, ADMIN_SYS_AUTH); // 角色管理
 		
 		this.add("/admin/sys_auth_dept", TpbDepartmentController.class, ADMIN_SYS_AUTH); // 部门管理
+		
+		this.add("/admin/sys_constant", TpbSysConstantController.class, ADMIN_SYS_AUTH); // 字典管理
 		
 	}
 }

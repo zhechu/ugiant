@@ -45,4 +45,13 @@ public class TpbSysConstant extends BaseModel<TpbSysConstant> {
 		return dao.findFirst(sql.toString(), type, value);
 	}
 	
+	/**
+	 * 根据常量父 id 获取常量
+	 * @param parentId 常量父 id
+	 * @return
+	 */
+	public List<TpbSysConstant> findByParentId(Integer parentId) {
+		return find("select a.* from tpb_sys_constant a where a.parent_id = ? order by a.sort_no", parentId);
+	}
+	
 }

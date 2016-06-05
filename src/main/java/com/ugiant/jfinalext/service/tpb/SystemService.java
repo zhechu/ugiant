@@ -51,7 +51,7 @@ public class SystemService {
 	
 	private TpbRoleMenuBtn tpbRoleMenuBtnDao = TpbRoleMenuBtn.dao; // 角色菜单按钮 dao
 	
-	private TpbSysConstant sysConstantDao = TpbSysConstant.dao; // 常量 dao
+	private TpbSysConstant tpbSysConstantDao = TpbSysConstant.dao; // 常量 dao
 	
 	private TpbRole tpbRoleDao = TpbRole.dao; // 角色 dao
 	
@@ -312,12 +312,60 @@ public class SystemService {
 	}
 	
 	/**
+	 * 获取根常量树
+	 * @return json 字符串
+	 */
+	public String getRootSysConstantTreeJson() {
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+		json.append(sysConstantTreeJson(0));
+		json.append("]");
+		return json.toString();
+	}
+	
+	/**
+	 * 递归拼接常量树
+	 * @param parentId 常量父 id
+	 * @return
+	 */
+	private String sysConstantTreeJson(Integer parentId) {
+		StringBuilder json = new StringBuilder();
+		List<TpbSysConstant> constantList = tpbSysConstantDao.findByParentId(parentId);
+		TpbSysConstant tempConstant = null;
+		int size = constantList.size();
+		for (int i=0; i<size; i++) {
+			tempConstant = constantList.get(i);
+			json.append("{");
+			json.append("\"id\":").append(tempConstant.getInt("id")).append(",");
+			json.append("\"text\":\"").append(tempConstant.getStr("label")).append("\",");
+			json.append("\"value\":").append(tempConstant.getInt("value")).append(",");
+			json.append("\"parent_id\":").append(tempConstant.getInt("parent_id")).append(",");
+			json.append("\"type\":\"").append(tempConstant.getStr("type")).append("\",");
+			json.append("\"description\":\"").append(tempConstant.getStr("description")).append("\",");
+			json.append("\"sort_no\":\"").append(tempConstant.get("sort_no","")).append("\",");
+			json.append("\"created\":\"").append(tempConstant.get("created","")).append("\",");
+			json.append("\"updated\":\"").append(tempConstant.get("updated","")).append("\"");
+			if(tempConstant.getInt("is_parent") == Flag.YES){
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(sysConstantTreeJson(tempConstant.getInt("id")));
+				json.append("]");
+			}
+			json.append("}");
+			if (i < size-1){
+				json.append(",");
+			}
+		}
+		return json.toString();
+	}
+	
+	/**
 	 * 根据类型获取常量列表
 	 * @param type 常量类型
 	 * @return
 	 */
 	public List<TpbSysConstant> findConstantByType(String type) {
-		return sysConstantDao.findByType(type);
+		return tpbSysConstantDao.findByType(type);
 	}
 	
 	/**
@@ -327,7 +375,7 @@ public class SystemService {
 	 * @return
 	 */
 	public TpbSysConstant findByTypeAndValue(String type, Integer value) {
-		return sysConstantDao.findByTypeAndValue(type, value);
+		return tpbSysConstantDao.findByTypeAndValue(type, value);
 	}
 	
 	/**
@@ -1061,6 +1109,15 @@ public class SystemService {
 				throw new MyException("添加角色菜单按钮关系失败");
 			}
 		}
+	}
+
+	/**
+	 * 获取常量
+	 * @param id
+	 * @return
+	 */
+	public TpbSysConstant findSysConstantById(Integer id) {
+		return tpbSysConstantDao.findById(id);
 	}
 	
 }
