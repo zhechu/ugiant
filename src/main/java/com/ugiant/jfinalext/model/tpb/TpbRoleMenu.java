@@ -63,4 +63,18 @@ public class TpbRoleMenu extends BaseModel<TpbRoleMenu> {
 		Db.update("delete from tpb_role_menu where role_id = ?", roleId);
 	}
 	
+	/**
+	 * 检查角色是否有菜单权限
+	 * @param menuId 菜单 id
+	 * @param roleId 角色 id
+	 * @return
+	 */
+	public boolean checkRoleHasMenu(Integer menuId, Integer roleId) {
+		Record r = Db.findFirst(" select 1 from tpb_role_menu where menu_id = ? and role_id = ?", menuId, roleId);
+		if(r != null){
+			return true;
+		}
+		return false;
+	}
+	
 }

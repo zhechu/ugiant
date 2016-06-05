@@ -24,7 +24,23 @@ public class TpbRole extends BaseModel<TpbRole> {
 	 * @return
 	 */
 	public List<Record> find() {
-		return Db.find("select a.* from tpb_role a");
+		return Db.find("select a.* from tpb_role a order by a.created");
+	}
+	
+	/**
+	 * 根据参数查询
+	 * @param status
+	 * @return
+	 */
+	public List<Record> findByParams(Integer status) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("select a.* from tpb_role a");
+		sql.append(" where 1 = 1");
+		if (status != null) {
+			sql.append(" and a.status = ").append(status);
+		}
+		sql.append(" order by a.created");
+		return Db.find(sql.toString());
 	}
 	
 	/**

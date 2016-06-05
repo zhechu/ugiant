@@ -40,10 +40,28 @@ public class TpbMenu extends BaseModel<TpbMenu> {
 	 * @return
 	 */
 	public List<TpbMenu> findByParentId(Integer parentId) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select a.* from tpb_menu a where a.parent_id = ? order by a.sort_no");
-		return find(sql.toString(), parentId);
+		return findByParams(parentId, null);
 	}
+	
+	/**
+	 * 根据参数获取菜单
+	 * @param parentId 菜单父 id
+	 * @param status 状态
+	 * @return
+	 */
+	public List<TpbMenu> findByParams(Integer parentId, Integer status) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("select a.* from tpb_menu a");
+		sql.append(" where 1 = 1");
+		if (parentId != null) {
+			sql.append(" and a.parent_id = ").append(parentId);
+		}
+		if (status != null) {
+			sql.append(" and a.status = ").append(status);
+		}
+		sql.append(" order by a.sort_no");
+		return find(sql.toString());
+	} 
 	
 	/**
 	 * 更新菜单

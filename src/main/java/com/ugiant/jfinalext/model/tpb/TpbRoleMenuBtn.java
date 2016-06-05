@@ -78,5 +78,19 @@ public class TpbRoleMenuBtn extends BaseModel<TpbRoleMenuBtn> {
 	public void deleteByRoleId(Integer roleId) {
 		Db.update("delete from tpb_role_menu_btn where role_id = ?", roleId);
 	}
+
+	/**
+	 * 检查角色是否有菜单按钮权限
+	 * @param menuBtnId 菜单按钮 id
+	 * @param roleId 角色 id
+	 * @return
+	 */
+	public boolean checkRoleHasMenuBtn(Integer menuBtnId, Integer roleId) {
+		Record r = Db.findFirst(" select 1 from tpb_role_menu_btn where btn_id = ? and role_id = ?", menuBtnId, roleId);
+		if(r != null){
+			return true;
+		}
+		return false;
+	}
 	
 }

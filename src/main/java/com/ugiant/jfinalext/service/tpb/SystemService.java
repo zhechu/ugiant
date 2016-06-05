@@ -660,6 +660,15 @@ public class SystemService {
 	public TpbRole findRoleById(Integer id) {
 		return tpbRoleDao.findById(id);
 	}
+	
+	/**
+	 * 根据状态获取角色
+	 * @param status
+	 * @return
+	 */
+	public List<Record> findRoleByStatus(Integer status) {
+		return tpbRoleDao.findByParams(status);
+	}
 
 	/**
 	 * 添加角色
@@ -767,6 +776,8 @@ public class SystemService {
 		if (StrKit.notBlank(password)) { // 密码不为空时，才更新
 			password_salt = SecureUtil.passwdSalt();
 			password = SecureUtil.passwd(password, password_salt);
+		} else {
+			password = null;
 		}
 		tpbSysUserDao.update(id, username, nickname, password, password_salt, currentUserId);
 		
@@ -918,5 +929,138 @@ public class SystemService {
 			cascadeDeleteDept(department.getInt("id"));
 		}
 	}
+	
+	/**
+	 * 获取权限树
+	 * @param roleId 角色 id
+	 * @param parentId 菜单父 id
+	 * @return
+	 */
+	public String getTreeAuthJson(Integer roleId, Integer parentId){
+		String json = "[";
+		json += authTreeJson(roleId, parentId);
+		json += "]";
+		return json;
+	}
 
+	/**
+	 * 递归
+	 * @param roleId 角色 id
+	 * @param parentId 菜单父 id
+	 * @return
+	 */
+	private String authTreeJson(Integer roleId, Integer parentId) {
+		StringBuilder json = new StringBuilder();
+		List<TpbMenu> list = tpbMenuDao.findByParams(parentId, Status.NORMAL);
+		int size = list.size();
+		TpbMenu menu = null;
+		for (int i=0; i<size; i++) { 
+			menu = list.get(i);
+			json.append("{");
+			json.append("\"id\":").append(menu.getInt("id")).append(",");
+			json.append("\"text\":\"").append(menu.getStr("name")).append("\",");
+			json.append("\"status\":\"").append(menu.getInt("status")).append("\",");
+			json.append("\"code\":\"").append(menu.get("code","")).append("\",");
+			json.append("\"link_url\":\"").append(menu.get("link_url","")).append("\",");
+			json.append("\"parent_id\":").append(menu.getInt("parent_id")).append(",");
+			json.append("\"sort_no\":").append(menu.getInt("sort_no")).append(",");
+			json.append("\"created\":\"").append(menu.get("created","")).append("\",");
+			json.append("\"updated\":\"").append(menu.get("updated","")).append("\",");
+			if (tpbRoleMenuDao.checkRoleHasMenu(menu.getInt("id"), roleId)) {
+				json.append("\"checked\":true,");
+			} else {
+				json.append("\"checked\":false,");
+			}
+			json.append("\"btns\":").append(getBtns(roleId, menu.getInt("id"))).append(",");
+			json.append("\"menu_level\":\"").append(menu.get("menu_level","")).append("\"");
+			if(menu.getInt("is_parent") == Flag.YES){
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(authTreeJson(roleId, menu.getInt("id")));
+				json.append("]");
+			}
+			json.append("}");
+			if (i != size-1) {
+				json.append(",");
+			}
+		}
+		return json.toString();
+	}
+	
+	/**
+	 * 菜单按钮列表
+	 * @param roleId 角色 id
+	 * @param menuId 菜单 id
+	 * @return
+	 */
+	private String getBtns(Integer roleId, Integer menuId) {
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+		List<Record> list = tpbMenuBtnDao.findByParams(menuId, Status.NORMAL, null);
+		int size = list.size();
+		Record menuBtn = null;
+		for (int i=0; i<size; i++) { 
+			menuBtn = list.get(i);
+			json.append("{");
+			json.append("\"id\":").append(menuBtn.getInt("id")).append(",");
+			if (tpbRoleMenuBtnDao.checkRoleHasMenuBtn(menuBtn.getInt("id"), roleId)) {
+				json.append("\"checked\":true,");
+			} else {
+				json.append("\"checked\":false,");
+			}
+			json.append("\"btn_name\":\"").append(menuBtn.getStr("btn_name")).append("\"");
+			json.append("}");
+			if (i != size-1) {
+				json.append(",");
+			}
+		}
+		json.append("]");
+		return json.toString();
+	}
+	
+	/**
+	 * 更新角色菜单关系
+	 * @param roleId 角色 id
+	 * @param menuIds 菜单 ids
+	 */
+	public void updateRoleMenu(Integer roleId, Integer[] menuIds) {
+		// 删除旧的角色菜单关系
+		tpbRoleMenuDao.deleteByRoleId(roleId);
+		
+		// 添加新的角色菜单关系
+		TpbRoleMenu roleMenu = null;
+		for (Integer menuId : menuIds) {
+			roleMenu = new TpbRoleMenu();
+			roleMenu.set("role_id", roleId)
+					.set("menu_id", menuId);
+			if (!roleMenu.save()) {
+				throw new MyException("添加角色菜单关系失败");
+			}
+		}
+	}
+	
+	/**
+	 * 更新角色菜单按钮关系
+	 * @param roleId 角色 id
+	 * @param menuBtnIds 菜单按钮 ids
+	 */
+	public void updateRoleMenuBtn(Integer roleId, Integer[] menuBtnIds) {
+		// 删除旧的角色菜单按钮关系
+		tpbRoleMenuBtnDao.deleteByRoleId(roleId);
+		
+		// 添加新的角色菜单按钮关系
+		TpbRoleMenuBtn roleMenuBtn = null;
+		TpbMenuBtn menuBtn = null;
+		for (Integer menuBtnId : menuBtnIds) {
+			menuBtn = tpbMenuBtnDao.findById(menuBtnId);
+			roleMenuBtn = new TpbRoleMenuBtn();
+			roleMenuBtn.set("role_id", roleId)
+					   .set("menu_id", menuBtn.getInt("menu_id"))
+					   .set("btn_id", menuBtnId);
+			if (!roleMenuBtn.save()) {
+				throw new MyException("添加角色菜单按钮关系失败");
+			}
+		}
+	}
+	
 }

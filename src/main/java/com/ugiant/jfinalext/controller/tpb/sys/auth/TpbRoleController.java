@@ -45,6 +45,13 @@ public class TpbRoleController extends BaseController {
 	}
 
 	/**
+	 * 获取可用的角色
+	 */
+	public void datalist(){
+		this.renderJson(systemService.findRoleByStatus(Status.NORMAL));
+	}
+	
+	/**
 	 * 获取角色列表
 	 */
 	public void list() {

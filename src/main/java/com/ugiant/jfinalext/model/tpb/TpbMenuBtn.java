@@ -126,5 +126,5 @@ public class TpbMenuBtn extends BaseModel<TpbMenuBtn> {
 	public void update(Integer id, Integer status, Integer currentUserId) {
 		update(id, status, null, null, null, null, null, currentUserId);
 	}
-	
+
 }
