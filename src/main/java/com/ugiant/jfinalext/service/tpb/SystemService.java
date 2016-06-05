@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.jfinal.aop.Before;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.tx.Tx;
 import com.ugiant.constant.base.AppConstant;
 import com.ugiant.constant.base.Flag;
 import com.ugiant.constant.base.Status;
 import com.ugiant.exception.MyException;
+import com.ugiant.jfinalext.model.tpb.TpbDepartment;
 import com.ugiant.jfinalext.model.tpb.TpbDepartmentUser;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;
 import com.ugiant.jfinalext.model.tpb.TpbMenuBtn;
@@ -36,7 +35,9 @@ public class SystemService {
 	
 	public static final SystemService service = new SystemService(); // 系统管理业务单例
 	
-	private TpbDepartmentUser tpbDepartmentDao = TpbDepartmentUser.dao; // 部门 dao
+	private TpbDepartmentUser tpbDepartmentUserDao = TpbDepartmentUser.dao; // 部门用户 dao
+	
+	private TpbDepartment tpbDepartmentDao = TpbDepartment.dao; // 部门 dao
 	
 	private TpbRoleUser tpbRoleUserDao = TpbRoleUser.dao; // 角色用户 dao
 	
@@ -60,7 +61,7 @@ public class SystemService {
 	 * @return
 	 */
 	public Record findDepartmentByUserId(Integer userId){
-		return tpbDepartmentDao.findDepartmentByUserId(userId);
+		return tpbDepartmentUserDao.findDepartmentByUserId(userId);
 	}
 	
 	/**
@@ -173,7 +174,6 @@ public class SystemService {
 	 * @param currentUserId 当前用户 id
 	 * @return
 	 */
-	@Before(Tx.class)
 	public boolean resetPwd(String username, String old_password, String new_password, Integer currentUserId) {
 		TpbSysUser sysUser = null;
 		try {
@@ -231,33 +231,81 @@ public class SystemService {
 	private String menuTreeJson(Integer parentId) {
 		StringBuilder json = new StringBuilder();
 		List<TpbMenu> menuList = tpbMenuDao.findByParentId(parentId);
-		if(menuList != null){
-			TpbMenu tempMenu = null;
-			int len = menuList.size();
-			for (int i=0; i<len; i++) {
-				tempMenu = menuList.get(i);
-				json.append("{");
-				json.append("\"id\":").append(tempMenu.getInt("id")).append(",");
-				json.append("\"name\":\"").append(tempMenu.getStr("name")).append("\",");
-				json.append("\"status\":\"").append(tempMenu.getInt("status")).append("\",");
-				json.append("\"code\":\"").append(tempMenu.get("code","")).append("\",");
-				json.append("\"link_url\":\"").append(tempMenu.get("link_url","")).append("\",");
-				json.append("\"parent_id\":\"").append(tempMenu.get("parent_id","")).append("\",");
-				json.append("\"icon_cls\":\"").append(tempMenu.get("icon_cls","")).append("\",");
-				json.append("\"sort_no\":\"").append(tempMenu.get("sort_no","")).append("\",");
-				json.append("\"created\":\"").append(tempMenu.get("created","")).append("\",");
-				json.append("\"updated\":\"").append(tempMenu.get("updated","")).append("\",");
-				json.append("\"menu_level\":\"").append(tempMenu.get("menu_level","")).append("\"");
-				if(tempMenu.getInt("is_parent") == Flag.YES){
-					json.append(",");
-					json.append("\"children\" : [");
-					json.append(menuTreeJson(tempMenu.getInt("id")));
-					json.append("]");
-				}
-				json.append("}");
-				if (i < len-1){
-					json.append(",");
-				}
+		TpbMenu tempMenu = null;
+		int len = menuList.size();
+		for (int i=0; i<len; i++) {
+			tempMenu = menuList.get(i);
+			json.append("{");
+			json.append("\"id\":").append(tempMenu.getInt("id")).append(",");
+			json.append("\"name\":\"").append(tempMenu.getStr("name")).append("\",");
+			json.append("\"status\":\"").append(tempMenu.getInt("status")).append("\",");
+			json.append("\"code\":\"").append(tempMenu.get("code","")).append("\",");
+			json.append("\"link_url\":\"").append(tempMenu.get("link_url","")).append("\",");
+			json.append("\"parent_id\":\"").append(tempMenu.get("parent_id","")).append("\",");
+			json.append("\"icon_cls\":\"").append(tempMenu.get("icon_cls","")).append("\",");
+			json.append("\"sort_no\":\"").append(tempMenu.get("sort_no","")).append("\",");
+			json.append("\"created\":\"").append(tempMenu.get("created","")).append("\",");
+			json.append("\"updated\":\"").append(tempMenu.get("updated","")).append("\",");
+			json.append("\"menu_level\":\"").append(tempMenu.get("menu_level","")).append("\"");
+			if(tempMenu.getInt("is_parent") == Flag.YES){
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(menuTreeJson(tempMenu.getInt("id")));
+				json.append("]");
+			}
+			json.append("}");
+			if (i < len-1){
+				json.append(",");
+			}
+		}
+		return json.toString();
+	}
+	
+	/**
+	 * 获取根部门树
+	 * @return json 字符串
+	 */
+	public String getRootDeptTreeJson() {
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+		json.append(deptTreeJson(0));
+		json.append("]");
+		return json.toString();
+	}
+	
+	/**
+	 * 递归拼接部门树
+	 * @param parentId 菜单父 id
+	 * @return
+	 */
+	private String deptTreeJson(Integer parentId) {
+		StringBuilder json = new StringBuilder();
+		List<TpbDepartment> deptList = tpbDepartmentDao.findByParentId(parentId);
+		TpbDepartment tempDept = null;
+		int len = deptList.size();
+		for (int i=0; i<len; i++) {
+			tempDept = deptList.get(i);
+			json.append("{");
+			json.append("\"id\":").append(tempDept.getInt("id")).append(",");
+			json.append("\"name\":\"").append(tempDept.getStr("name")).append("\",");
+			json.append("\"nickname\":\"").append(tempDept.getStr("nickname")).append("\",");
+			json.append("\"code\":\"").append(tempDept.getStr("code")).append("\",");
+			json.append("\"type\":\"").append(tempDept.getInt("type")).append("\",");
+			json.append("\"type_str\":\"").append(tempDept.getStr("type_str")).append("\",");
+			json.append("\"description\":\"").append(tempDept.getStr("description")).append("\",");
+			json.append("\"dt_level\":\"").append(tempDept.getInt("dt_level")).append("\",");
+			json.append("\"sort_no\":\"").append(tempDept.get("sort_no","")).append("\",");
+			json.append("\"created\":\"").append(tempDept.get("created","")).append("\",");
+			json.append("\"updated\":\"").append(tempDept.get("updated","")).append("\"");
+			if(tempDept.getInt("is_parent") == Flag.YES){
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(deptTreeJson(tempDept.getInt("id")));
+				json.append("]");
+			}
+			json.append("}");
+			if (i < len-1){
+				json.append(",");
 			}
 		}
 		return json.toString();
@@ -308,6 +356,52 @@ public class SystemService {
 	public TpbMenuBtn findMenuBtnById(Integer id) {
 		return tpbMenuBtnDao.findById(id);
 	}
+
+	/**
+	 * 部门树 json 字符串
+	 * @param parentId
+	 * @return
+	 */
+	public String getDeptJson(Integer parentId) {
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+		json.append(getDept(parentId));
+		json.append("]");
+		return json.toString();
+	}
+
+	/**
+	 * 递归
+	 * @param parentId 部门父 id
+	 * @return
+	 */
+	private String getDept(Integer parentId){
+		List<TpbDepartment> list = tpbDepartmentDao.findByParentId(parentId);
+		StringBuilder json = new StringBuilder();
+		int size = list.size();
+		TpbDepartment tempDept = null;
+		for(int i=0; i<size; i++){ 
+			tempDept = list.get(i);
+			json.append("{");
+			json.append("\"id\":").append(tempDept.getInt("id")).append(",");
+			json.append("\"text\":\"").append(tempDept.getStr("name")).append("\",");
+			json.append("\"state\":\"open\"").append(",");
+			json.append("\"attributes\" : {");
+			json.append("\"type\":").append(tempDept.getInt("type"));
+			json.append("}");
+			if(tempDept.getInt("is_parent") == Flag.YES){ // 若是父节点，则递归
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(getDept(tempDept.getInt("id")));
+				json.append("]");
+			}
+			json.append("}");
+			if(i != size-1){
+				json.append(",");
+			}
+		}
+		return json.toString();
+	}
 	
 	/**
 	 * 菜单树 json字符串
@@ -347,33 +441,31 @@ public class SystemService {
 		if(type != null){
 			sql.append(" and a.type = " + type);
 		}
-		sql.append(" order by sort_no");
+		sql.append(" order by a.sort_no");
 		List<Record> list = Db.find(sql.toString());
-		if(list != null){
-			int size = list.size();
-			Record r = null;
-			for(int i=0; i<size; i++){ 
-				r = list.get(i);
-				json.append("{");
-				json.append("\"id\":").append(r.getInt("id")).append(",");
-				json.append("\"text\":\"").append(r.getStr("name")).append("\",");
-				json.append("\"state\":\"open\"").append(",");
-				json.append("\"attributes\" : {");
-				if(StrKit.notBlank(r.getStr("link_url"))){
-					json.append("\"url\":\"").append(r.getStr("link_url")).append("\"");
-				}
+		int size = list.size();
+		Record r = null;
+		for(int i=0; i<size; i++){ 
+			r = list.get(i);
+			json.append("{");
+			json.append("\"id\":").append(r.getInt("id")).append(",");
+			json.append("\"text\":\"").append(r.getStr("name")).append("\",");
+			json.append("\"state\":\"open\"").append(",");
+			json.append("\"attributes\" : {");
+			if(StrKit.notBlank(r.getStr("link_url"))){
+				json.append("\"url\":\"").append(r.getStr("link_url")).append("\"");
+			}
+			json.append("}");
+			if(r.getInt("is_parent") == Flag.YES){ // 若是父节点，则递归
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(getMenu(r.getInt("id"),roleIds,type));
+				json.append("]");
+			}
+			if(i == size-1){
 				json.append("}");
-				if(r.getInt("is_parent") == Flag.YES){ // 若是父节点，则递归
-					json.append(",");
-					json.append("\"children\" : [");
-					json.append(getMenu(r.getInt("id"),roleIds,type));
-					json.append("]");
-				}
-				if(i == size-1){
-					json.append("}");
-				}else {
-					json.append("},");
-				}
+			}else {
+				json.append("},");
 			}
 		}
 		return json.toString();
@@ -384,7 +476,6 @@ public class SystemService {
 	 * @param menu 菜单 model
 	 * @param currentUserId 当前用户 id 
 	 */
-	@Before(Tx.class)
 	public void addMenu(TpbMenu menu, Integer currentUserId) {
 		menu.set("status", Status.NORMAL);
 		Integer parentId = menu.getInt("parent_id");
@@ -397,12 +488,14 @@ public class SystemService {
 			menu.set("is_parent", 0); // 非父节点
 			menu.set("created", new Date());
 			menu.set("create_user_id", 1);
-			if (menu.save()) {
-				throw new MyException("操作失败");
+			if (!menu.save()) {
+				throw new MyException("操作菜单失败");
 			}
 			if (parent.getInt("is_parent") == 0) { // 更新父节点的是否父节点标记
 				parent.set("is_parent", 1);
-				parent.update();
+				if (!parent.update()) {
+					throw new MyException("更新父菜单失败");
+				}
 			}
 		} else { // 初始菜单
 			menu.set("parent_id", 0);
@@ -417,7 +510,7 @@ public class SystemService {
 		// 添加菜单成功后，分配菜单权限给超级管理员
 		TpbRoleMenu roleMenu = new TpbRoleMenu();
 		roleMenu.set("role_id", AppConstant.ADMIN_ROLE_ID)
-		.set("menu_id", menu.getInt("id"));
+				.set("menu_id", menu.getInt("id"));
 		if (!roleMenu.save()) {
 			throw new MyException("分配超级管理员菜单权限失败");
 		}
@@ -433,7 +526,6 @@ public class SystemService {
 	 * @param icon_cls 菜单样式
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateMenu(Integer id, String code, String name, String link_url, Integer sort_no, String icon_cls, Integer currentUserId) {
 		tpbMenuDao.update(id, code, name, link_url, sort_no, icon_cls, currentUserId);
 	}
@@ -444,7 +536,6 @@ public class SystemService {
 	 * @param status 菜单状态
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateMenuStatus(Integer id, Integer status, Integer currentUserId) {
 		tpbMenuDao.update(id, status, currentUserId);
 	}
@@ -453,8 +544,15 @@ public class SystemService {
 	 * 删除菜单
 	 * @param id 菜单 id
 	 */
-	@Before(Tx.class)
 	public void deleteMenu(Integer id) {
+		cascadeDeleteMenu(id);
+	}
+	
+	/**
+	 * 级联删除菜单
+	 * @param id 菜单 id
+	 */
+	private void cascadeDeleteMenu(Integer id) {
 		// 删除角色菜单关系
 		tpbRoleMenuDao.deleteByMenuId(id);
 		
@@ -471,6 +569,12 @@ public class SystemService {
 		
 		// 删除菜单
 		tpbMenuDao.deleteById(id);
+		
+		// 若存在子节点，则继续删除子节点
+		List<TpbMenu> menuList = tpbMenuDao.findByParentId(id);
+		for (TpbMenu menu : menuList) {
+			cascadeDeleteMenu(menu.getInt("id"));
+		}
 	}
 	
 	/**
@@ -492,7 +596,6 @@ public class SystemService {
 	 * @param icon_cls 菜单按钮样式
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateMenuBtn(Integer id, String btn_name, String code, Integer sort_no, Integer type, String icon_cls, Integer currentUserId) {
 		tpbMenuBtnDao.update(id, btn_name, code, sort_no, type, icon_cls, currentUserId);
 	}
@@ -502,7 +605,6 @@ public class SystemService {
 	 * @param menuBtn 菜单按钮 model
 	 * @param currentUserId 当前用户 id 
 	 */
-	@Before(Tx.class)
 	public void addMenuBtn(TpbMenuBtn menuBtn, Integer currentUserId) {
 		menuBtn.set("status", Status.NORMAL)
 			   .set("created", new Date())
@@ -526,7 +628,6 @@ public class SystemService {
 	 * @param status 菜单按钮状态
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateMenuBtnStatus(Integer id, Integer status, Integer currentUserId) {
 		tpbMenuBtnDao.update(id, status, currentUserId);
 	}
@@ -535,7 +636,6 @@ public class SystemService {
 	 * 删除菜单按钮
 	 * @param id
 	 */
-	@Before(Tx.class)
 	public void deleteMenuBtn(Integer id) {
 		// 删除角色菜单按钮关系
 		tpbRoleMenuBtnDao.deleteByMenuBtnId(id);
@@ -566,7 +666,6 @@ public class SystemService {
 	 * @param role 角色 model
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void addRole(TpbRole role, Integer currentUserId) {
 		role.set("status", Status.NORMAL)
 			.set("code", SysCodeUtil.initRoleCode())
@@ -584,7 +683,6 @@ public class SystemService {
 	 * @param description 角色描述
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateRole(Integer id, String name, String description, Integer currentUserId) {
 		tpbRoleDao.update(id, name, description, currentUserId);
 	}
@@ -595,7 +693,6 @@ public class SystemService {
 	 * @param status 角色状态
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateRoleStatus(Integer id, Integer status, Integer currentUserId) {
 		tpbRoleDao.update(id, status, currentUserId);
 	}
@@ -604,7 +701,6 @@ public class SystemService {
 	 * 删除角色
 	 * @param id
 	 */
-	@Before(Tx.class)
 	public void deleteRole(Integer id) {
 		// 删除角色用户关系
 		tpbRoleUserDao.deleteByRoleId(id);
@@ -654,7 +750,6 @@ public class SystemService {
 	 * @param roleIds 角色 ids
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateSysUser(Integer id, String username, String nickname, String password, Integer[] roleIds, Integer currentUserId) {
 		// 检查用户名是否存在
 		TpbSysUser temp = tpbSysUserDao.findById(id);
@@ -689,7 +784,6 @@ public class SystemService {
 	 * @param roleIds 角色 ids
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void addSysUser(TpbSysUser sysUser, String password, Integer[] roleIds, Integer currentUserId) {
 		// 检查用户名是否存在
 		TpbSysUser temp = tpbSysUserDao.findByUsername(sysUser.getStr("username"));
@@ -719,7 +813,6 @@ public class SystemService {
 	 * @param status 状态
 	 * @param currentUserId 当前用户 id
 	 */
-	@Before(Tx.class)
 	public void updateSysUserStatus(Integer id, Integer status, Integer currentUserId) {
 		tpbSysUserDao.update(id, status, currentUserId);
 	}
@@ -728,7 +821,6 @@ public class SystemService {
 	 * 删除后台用户
 	 * @param id
 	 */
-	@Before(Tx.class)
 	public void deleteSysUser(Integer id) {
 		// 删除角色用户关系
 		tpbRoleUserDao.deleteByUserId(id);
@@ -736,5 +828,95 @@ public class SystemService {
 		// 删除后台用户
 		tpbSysUserDao.deleteById(id);
 	}
+
+	/**
+	 * 获取部门
+	 * @param id
+	 * @return
+	 */
+	public TpbDepartment findDepartmentById(Integer id) {
+		return tpbDepartmentDao.findById(id);
+	}
 	
+	/**
+	 * 更新部门
+	 * @param id 部门 id
+	 * @param name 部门名称
+	 * @param nickname 部门别名
+	 * @param description 部门描述
+	 * @param type 部门类型
+	 * @param sort_no 部门排序
+	 * @param currentUserId 当前用户 id
+	 */
+	public void updateDepartment(Integer id, String name, String nickname, String description, Integer type,
+			Integer sort_no, Integer currentUserId) {
+		tpbDepartmentDao.update(id, name, nickname, description, type, sort_no, currentUserId);
+	}
+
+	/**
+	 * 添加部门
+	 * @param dept 部门 model
+	 * @param currentUserId 当前用户 id
+	 */
+	public void addDepartment(TpbDepartment dept, Integer currentUserId) {
+		TpbDepartment parent = null;
+		Integer parent_id = dept.getInt("parent_id");
+		if (parent_id != null) {
+			parent = tpbDepartmentDao.findById(parent_id);
+		}
+		if (parent != null) { // 已选父部门
+			dept.set("dt_level", parent.getInt("dt_level")+1)
+				.set("is_parent", Flag.NO)
+				.set("code", SysCodeUtil.deptCode())
+				.set("created", new Date())
+				.set("create_user_id", currentUserId);
+			if (!dept.save()) {
+				throw new MyException("添加部门失败");
+			}
+			// 若父部门为子节点，则更新其为父节点
+			if (parent.getInt("is_parent") == Flag.NO) { 
+				parent.set("is_parent", Flag.YES);
+				if (!parent.update()) {
+					throw new MyException("更新父部门失败");
+				}
+			}
+		} else { // 未选父部门，则为层级最高部门
+			dept.set("parent_id", 0)
+				.set("dt_level", 1)
+				.set("is_parent", Flag.NO)
+				.set("code", SysCodeUtil.deptCode())
+				.set("created", new Date())
+				.set("create_user_id", currentUserId);
+			if (!dept.save()) {
+				throw new MyException("添加部门失败");
+			}
+		}
+	}
+
+	/**
+	 * 删除部门
+	 * @param id
+	 */
+	public void deleteDepartment(Integer id) {
+		cascadeDeleteDept(id);
+	}
+	
+	/**
+	 * 级联删除部门
+	 * @param id 部门 id
+	 */
+	private void cascadeDeleteDept(Integer id) {
+		// 删除部门用户关系
+		// TODO
+		
+		// 删除部门
+		tpbDepartmentDao.deleteById(id);
+		
+		// 若存在子节点，则继续删除子节点
+		List<TpbDepartment> deptList = tpbDepartmentDao.findByParentId(id);
+		for (TpbDepartment department : deptList) {
+			cascadeDeleteDept(department.getInt("id"));
+		}
+	}
+
 }

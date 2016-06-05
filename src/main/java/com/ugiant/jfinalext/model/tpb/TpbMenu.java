@@ -1,6 +1,5 @@
 package com.ugiant.jfinalext.model.tpb;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,14 +40,9 @@ public class TpbMenu extends BaseModel<TpbMenu> {
 	 * @return
 	 */
 	public List<TpbMenu> findByParentId(Integer parentId) {
-		List<TpbMenu> menuList = new ArrayList<TpbMenu>();
-		if (parentId == null) {
-			return menuList;
-		}
 		StringBuilder sql = new StringBuilder();
 		sql.append("select a.* from tpb_menu a where a.parent_id = ? order by a.sort_no");
-		menuList = TpbMenu.dao.find(sql.toString(), parentId);
-		return menuList;
+		return find(sql.toString(), parentId);
 	}
 	
 	/**

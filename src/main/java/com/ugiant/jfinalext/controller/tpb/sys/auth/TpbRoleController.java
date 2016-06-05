@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.constant.base.Status;
 import com.ugiant.exception.MyException;
@@ -76,87 +77,59 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 添加或更新
 	 */
-	@Before(TpbRoleValidator.class)
+	@Before({TpbRoleValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
-			TpbRole role = this.getModel(TpbRole.class);
-			Integer id = role.getInt("id");
-			if (id != null) { // 更新
-				systemService.updateRole(id, role.getStr("name"), role.getStr("description"), currentUserId);
-			} else { // 添加
-				systemService.addRole(role, currentUserId);
-			}
-			rm.msgSuccess("操作角色成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
+		LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+		Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+		TpbRole role = this.getModel(TpbRole.class);
+		Integer id = role.getInt("id");
+		if (id != null) { // 更新
+			systemService.updateRole(id, role.getStr("name"), role.getStr("description"), currentUserId);
+		} else { // 添加
+			systemService.addRole(role, currentUserId);
 		}
+		rm.msgSuccess("操作角色成功");
 		this.renderJson(rm);
 	}
 
 	/**
 	 * 禁用
 	 */
-	@Before(IdValidator.class)
+	@Before({IdValidator.class, Tx.class})
 	public void forbidden(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			Integer id = this.getParaToInt("id");
-			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
-			systemService.updateRoleStatus(id, Status.FORBIDDEN, currentUserId);
-			rm.msgSuccess("禁用成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
-		}
+		Integer id = this.getParaToInt("id");
+		LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+		Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+		systemService.updateRoleStatus(id, Status.FORBIDDEN, currentUserId);
+		rm.msgSuccess("禁用成功");
 		this.renderJson(rm);
 	}
 	
 	/**
 	 * 启用
 	 */
-	@Before(IdValidator.class)
+	@Before({IdValidator.class, Tx.class})
 	public void normal(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			Integer id = this.getParaToInt("id");
-			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
-			systemService.updateRoleStatus(id, Status.NORMAL, currentUserId);
-			rm.msgSuccess("启用成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
-		}
+		Integer id = this.getParaToInt("id");
+		LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+		Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+		systemService.updateRoleStatus(id, Status.NORMAL, currentUserId);
+		rm.msgSuccess("启用成功");
 		this.renderJson(rm);
 	}
 
 	/**
 	 * 删除
 	 */
-	@Before(IdValidator.class)
+	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			Integer id = this.getParaToInt("id");
-			systemService.deleteRole(id);
-			rm.msgSuccess("删除成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
-		}
+		Integer id = this.getParaToInt("id");
+		systemService.deleteRole(id);
+		rm.msgSuccess("删除成功");
 		this.renderJson(rm);
 	}
 	

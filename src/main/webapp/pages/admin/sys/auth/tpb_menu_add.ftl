@@ -103,6 +103,9 @@
 	var parent_id = '${(tpbMenu.parent_id)!}';
 	$(function(){
 		$("#cc").combotree("setValues",parent_id);
+		$("#sort_no").TouchSpin({
+            initval: 1
+        });
 	});
 	
 	// 保存返回

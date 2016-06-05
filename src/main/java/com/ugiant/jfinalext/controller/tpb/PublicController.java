@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.jfinal.aop.Before;
 import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.render.CaptchaRender;
 import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.exception.MyException;
@@ -67,13 +68,15 @@ public class PublicController extends BaseController {
 			rm.msgSuccess("登录成功");
 			
 			Integer userId = sysUser.getInt("id");
-			//Record dept = systemService.findDepartmentByUserId(userId);
+			Record dept = systemService.findDepartmentByUserId(userId);
 			String roleIds = systemService.findRoleIdsByUserId(userId);
 			
 			LoginUserInfo loginUserInfo = new LoginUserInfo();
 			loginUserInfo.setUserId(sysUser.getInt("id"));
 			loginUserInfo.setUsername(sysUser.getStr("username"));
-			//loginUserInfo.setDeptId(dept.getInt("id"));
+			if (dept != null) {
+				loginUserInfo.setDeptId(dept.getInt("id"));
+			}
 			loginUserInfo.setRoleIds(roleIds);
 			
 			// 将登录用户信息存入 session

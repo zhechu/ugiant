@@ -5,6 +5,7 @@ import java.util.List;
 import com.jfinal.aop.Before;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.constant.base.Status;
 import com.ugiant.constant.tpb.TpbMenuType;
@@ -89,87 +90,59 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 添加或更新菜单
 	 */
-	@Before(TpbMenuValidator.class)
+	@Before({TpbMenuValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
-			TpbMenu menu = this.getModel(TpbMenu.class);
-			Integer menuId = menu.getInt("id");
-			if (menuId != null) { // 更新
-				systemService.updateMenu(menuId, menu.getStr("code"), menu.getStr("name"), menu.getStr("link_url"), menu.getInt("sort_no"), menu.getStr("icon_cls"), currentUserId);
-			} else { // 添加
-				systemService.addMenu(menu, currentUserId);
-			}
-			rm.msgSuccess("操作菜单成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
+		LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+		Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+		TpbMenu menu = this.getModel(TpbMenu.class);
+		Integer menuId = menu.getInt("id");
+		if (menuId != null) { // 更新
+			systemService.updateMenu(menuId, menu.getStr("code"), menu.getStr("name"), menu.getStr("link_url"), menu.getInt("sort_no"), menu.getStr("icon_cls"), currentUserId);
+		} else { // 添加
+			systemService.addMenu(menu, currentUserId);
 		}
+		rm.msgSuccess("操作菜单成功");
 		this.renderJson(rm);
 	}
 
 	/**
 	 * 禁用
 	 */
-	@Before(IdValidator.class)
+	@Before({IdValidator.class, Tx.class})
 	public void forbidden(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			Integer id = this.getParaToInt("id");
-			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
-			systemService.updateMenuStatus(id, Status.FORBIDDEN, currentUserId);
-			rm.msgSuccess("禁用成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
-		}
+		Integer id = this.getParaToInt("id");
+		LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+		Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+		systemService.updateMenuStatus(id, Status.FORBIDDEN, currentUserId);
+		rm.msgSuccess("禁用成功");
 		this.renderJson(rm);
 	}
 	
 	/**
 	 * 启用
 	 */
-	@Before(IdValidator.class)
+	@Before({IdValidator.class, Tx.class})
 	public void normal(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			Integer id = this.getParaToInt("id");
-			LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
-			systemService.updateMenuStatus(id, Status.NORMAL, currentUserId);
-			rm.msgSuccess("禁用成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
-		}
+		Integer id = this.getParaToInt("id");
+		LoginUserInfo loginUserInfo = (LoginUserInfo) getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+		Integer currentUserId = loginUserInfo.getUserId(); // 当前用户 id
+		systemService.updateMenuStatus(id, Status.NORMAL, currentUserId);
+		rm.msgSuccess("禁用成功");
 		this.renderJson(rm);
 	}
 	
 	/**
 	 * 删除
 	 */
-	@Before(IdValidator.class)
+	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();
-		try {
-			Integer id = this.getParaToInt("id");
-			systemService.deleteMenu(id);
-			rm.msgSuccess("删除成功");
-		} catch (MyException me) {
-			rm.msgFailed(me.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			rm.msgFailed(MyMessage.SYS_EXCEPTION_MSG);
-		}
+		Integer id = this.getParaToInt("id");
+		systemService.deleteMenu(id);
+		rm.msgSuccess("删除成功");
 		this.renderJson(rm);
 	}
 	

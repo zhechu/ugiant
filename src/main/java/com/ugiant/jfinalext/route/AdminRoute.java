@@ -3,6 +3,7 @@ package com.ugiant.jfinalext.route;
 import com.ugiant.jfinalbase.BaseRoute;
 import com.ugiant.jfinalext.controller.tpb.AdminController;
 import com.ugiant.jfinalext.controller.tpb.PublicController;
+import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbDepartmentController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbMenuBtnController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbMenuController;
 import com.ugiant.jfinalext.controller.tpb.sys.auth.TpbRoleController;
@@ -35,6 +36,8 @@ public class AdminRoute extends BaseRoute {
 		this.add("/admin/sys_auth_menu_btn", TpbMenuBtnController.class, ADMIN_SYS_AUTH); // 后台菜单按钮管理
 		
 		this.add("/admin/sys_auth_role", TpbRoleController.class, ADMIN_SYS_AUTH); // 角色管理
+		
+		this.add("/admin/sys_auth_dept", TpbDepartmentController.class, ADMIN_SYS_AUTH); // 部门管理
 		
 	}
 }

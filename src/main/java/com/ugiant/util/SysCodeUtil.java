@@ -26,6 +26,14 @@ public class SysCodeUtil {
 	}
 	
 	/**
+	 * 生成部门编码
+	 * @return
+	 */
+	public static String deptCode(){
+		return generateSysCode("yyMMddHHmmss") + initRandomCode(4);
+	}
+	
+	/**
 	 * 构建用户验证码
 	 * @author	wwd
 	 * @date	2015-6-2
