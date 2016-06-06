@@ -77,32 +77,42 @@
 				field : 'text',
 				title : '标签名',
 				align : 'left',
-				width : '20%',
+				width : '15%',
 				editor : 'text'
 			}, {
 				field : 'value',
 				title : '数据值',
 				align : 'center',
-				width : '10%',
+				width : '8%',
 				editor : 'text'
 			}, {
 				field : 'type',
 				title : '类型',
 				align : 'left',
-				width : '25%',
+				width : '15%',
 				editor : 'text'
 			}, {
 				field : 'description',
-				title : '部门描述',
+				title : '描述',
 				align : 'left',
-				width : '40%',
+				width : '25%',
 				editor : 'text'
 			}, {
-				field : 'sort_no',
+				field : 'sort',
 				title : '排序',
 				align : 'center',
 				width : '5%',
 				editor : 'numberbox'
+			}, {
+				field : 'created',
+				title : '创建时间',
+				align : 'center',
+				width : '15%'
+			}, {
+				field : 'updated',
+				title : '更新时间',
+				align : 'center',
+				width : '15%'
 			} ] ]
 		});
 	});

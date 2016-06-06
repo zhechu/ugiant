@@ -342,7 +342,7 @@ public class SystemService {
 			json.append("\"parent_id\":").append(tempConstant.getInt("parent_id")).append(",");
 			json.append("\"type\":\"").append(tempConstant.getStr("type")).append("\",");
 			json.append("\"description\":\"").append(tempConstant.getStr("description")).append("\",");
-			json.append("\"sort_no\":\"").append(tempConstant.get("sort_no","")).append("\",");
+			json.append("\"sort\":\"").append(tempConstant.get("sort","")).append("\",");
 			json.append("\"created\":\"").append(tempConstant.get("created","")).append("\",");
 			json.append("\"updated\":\"").append(tempConstant.get("updated","")).append("\"");
 			if(tempConstant.getInt("is_parent") == Flag.YES){
@@ -1118,6 +1118,123 @@ public class SystemService {
 	 */
 	public TpbSysConstant findSysConstantById(Integer id) {
 		return tpbSysConstantDao.findById(id);
+	}
+
+	/**
+	 * 常量树 json 字符串
+	 * @param parentId
+	 * @return
+	 */
+	public String getSysConstantJson(Integer parentId) {
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+		json.append(getSysConstant(parentId));
+		json.append("]");
+		return json.toString();
+	}
+
+	/**
+	 * 递归
+	 * @param parentId 常量父 id
+	 * @return
+	 */
+	private String getSysConstant(Integer parentId){
+		List<TpbSysConstant> list = tpbSysConstantDao.findByParentId(parentId);
+		StringBuilder json = new StringBuilder();
+		int size = list.size();
+		TpbSysConstant tempSysConstant = null;
+		for(int i=0; i<size; i++){ 
+			tempSysConstant = list.get(i);
+			json.append("{");
+			json.append("\"id\":").append(tempSysConstant.getInt("id")).append(",");
+			json.append("\"text\":\"").append(tempSysConstant.getStr("type")).append("_").append(tempSysConstant.getStr("label")).append("\",");
+			json.append("\"state\":\"open\"");
+			if(tempSysConstant.getInt("is_parent") == Flag.YES){ // 若是父节点，则递归
+				json.append(",");
+				json.append("\"children\" : [");
+				json.append(getSysConstant(tempSysConstant.getInt("id")));
+				json.append("]");
+			}
+			json.append("}");
+			if(i != size-1){
+				json.append(",");
+			}
+		}
+		return json.toString();
+	}
+
+	/**
+	 * 更新常量
+	 * @param id 常量 id
+	 * @param type 类型
+	 * @param label 标签名 
+	 * @param value 数据值
+	 * @param description 描述
+	 * @param sort 排序
+	 * @param currentUserId 当前用户 id
+	 */
+	public void updateSysConstant(Integer id, String type, String label, Integer value, String description, Integer sort,
+			Integer currentUserId) {
+		tpbSysConstantDao.update(id, type, label, value, description, sort, currentUserId);
+	}
+
+	/**
+	 * 添加常量
+	 * @param constant 常量 model
+	 * @param currentUserId 当前用户 id
+	 */
+	public void addSysConstant(TpbSysConstant constant, Integer currentUserId) {
+		TpbSysConstant parent = null;
+		Integer parent_id = constant.getInt("parent_id");
+		if (parent_id != null) {
+			parent = tpbSysConstantDao.findById(parent_id);
+		}
+		if (parent != null) { // 已选父常量
+			constant.set("is_parent", Flag.NO)
+					.set("created", new Date())
+					.set("create_user_id", currentUserId);
+			if (!constant.save()) {
+				throw new MyException("添加字典失败");
+			}
+			// 若父常量为子节点，则更新其为父节点
+			if (parent.getInt("is_parent") == Flag.NO) { 
+				parent.set("is_parent", Flag.YES);
+				if (!parent.update()) {
+					throw new MyException("更新父字典失败");
+				}
+			}
+		} else { // 未选父字典，则父 id 为 0
+			constant.set("parent_id", 0)
+					.set("is_parent", Flag.NO)
+					.set("created", new Date())
+					.set("create_user_id", currentUserId);
+			if (!constant.save()) {
+				throw new MyException("添加字典失败");
+			}
+		}
+	}
+
+	/**
+	 * 删除常量
+	 * @param id
+	 */
+	public void deleteSysConstant(Integer id) {
+		cascadeDeleteSysConstant(id);
+	}
+	
+	/**
+	 * 级联删除常量
+	 * @param id 常量 id
+	 */
+	private void cascadeDeleteSysConstant(Integer id) {
+		// 删除常量
+		tpbSysConstantDao.deleteById(id);
+		
+		// 若存在子节点，则继续删除子节点
+		List<TpbSysConstant> constantList = tpbSysConstantDao.findByParentId(id);
+		for (TpbSysConstant constant : constantList) {
+			cascadeDeleteSysConstant(constant.getInt("id"));
+		}
 	}
 	
 }

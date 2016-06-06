@@ -11,7 +11,7 @@
 		<i class="fa fa-circle"></i>
 	</li>
 	<li>
-		<a href="/admin/sys_auth_dept">部门管理</a>
+		<a href="/admin/sys_constant">字典管理</a>
 		<i class="fa fa-circle"></i>
 	</li>
 	<li>
@@ -29,55 +29,55 @@
 			</div>
 			<div class="portlet-body form">
 				<!-- BEGIN FORM-->
-				<form  id="form_dept_add" class="form-horizontal">
+				<form  id="form_constant_add" class="form-horizontal">
 					<div class="form-body">
-						<input type="hidden" name="tpbDepartment.id" value="${(tpbDepartment.id)!''}"/>
+						<input type="hidden" name="tpbSysConstant.id" value="${(tpbSysConstant.id)!''}"/>
 						<div class="form-group">
-							<label class="control-label col-md-3">隶属部门 
+							<label class="control-label col-md-3">隶属字典 
 							</label>
 							<div class="col-md-4">
-								<input  id="cc" class="easyui-combotree form-control" style="width:80%;height:35px"" name="tpbDepartment.parent_id" <#if (tpbDepartment.parent_id)?exists>readonly</#if>>
+								<input  id="cc" class="easyui-combotree form-control" style="width:80%;height:35px"" name="tpbSysConstant.parent_id" <#if (tpbSysConstant.parent_id)?exists>readonly</#if>>
 								</input>
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-md-3">部门类型</label>
-							<div class="col-md-4">
-								<select class="form-control" id="ct" name="tpbDepartment.type">
-									
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label col-md-3">部门名称 <span class="required">
+							<label class="control-label col-md-3">类型 <span class="required">
 							* </span>
 							</label>
 							<div class="col-md-4">
-								<input name="tpbDepartment.name" type="text" class="form-control" value="${(tpbDepartment.name)!''}"/>
+								<input name="tpbSysConstant.type" type="text" class="form-control" value="${(tpbSysConstant.type)!''}"/>
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-md-3">部门别名 <span class="required">
+							<label class="control-label col-md-3">标签名 <span class="required">
 							* </span>
 							</label>
 							<div class="col-md-4">
-								<input name="tpbDepartment.nickname" type="text" class="form-control" value="${(tpbDepartment.nickname)!''}"/>
+								<input name="tpbSysConstant.label" type="text" class="form-control" value="${(tpbSysConstant.label)!''}"/>
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-md-3">部门描述 <span class="required">
+							<label class="control-label col-md-3">数据值<span class="required">
+							* </span>
+							</label>
+							<div class="col-md-4">
+								<input name="tpbSysConstant.value" type="text" class="form-control" value="${(tpbSysConstant.value)!''}"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-3">描述 <span class="required">
 							* </span>
 							</label>
 							<div class="col-md-6">
-								<textarea class="form-control" rows="5" placeholder="" name="tpbDepartment.description">${(tpbDepartment.description)!''}</textarea>
+								<textarea class="form-control" rows="5" placeholder="" name="tpbSysConstant.description">${(tpbSysConstant.description)!''}</textarea>
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-md-3">菜单排序 <span class="required">
+							<label class="control-label col-md-3">排序 <span class="required">
 							* </span>
 							</label>
 							<div class="col-md-4">
-								<input name="tpbDepartment.sort_no" id="sort_no" type="text" class="form-control" value="${(tpbDepartment.sort_no)!''}" />
+								<input name="tpbSysConstant.sort" id="sort" type="text" class="form-control" value="${(tpbSysConstant.sort)!''}" />
 							</div>
 						</div>
 					</div>
@@ -99,20 +99,19 @@
 </div>
 </div>
 <script>
-	var parent_id = '${(tpbDepartment.parent_id)!}';
+	var parent_id = '${(tpbSysConstant.parent_id)!}';
 	$(function(){
 		$("#cc").combotree({
-			url : "/admin/sys_auth_dept/getTreeDeptJson"
+			url : "/admin/sys_constant/getTreeSysConstantJson"
 		});
-		// 父部门
-		$('#cc').combotree('setValues', parent_id);
-		$("#sort_no").TouchSpin({
+		if (parent_id > 0) {
+			// 父类型
+			$('#cc').combotree('setValues', parent_id);
+		}
+		$("#sort").TouchSpin({
             initval: 1
         });
 	});
-	// 部门类型
-	var type = '${(tpbDepartment.type)!}';
-	listConstant("#ct", "dept_type", type);
 	
 	// 保存返回
 	function submitClose(){
@@ -126,25 +125,25 @@
 	
 	function submitForm(flag){
 		var option ={
-			url : '/admin/sys_auth_dept/save',
+			url : '/admin/sys_constant/save',
 			type : 'post',
 			dataType : 'json',
 			beforeSubmit : function() {
-				return $("#form_dept_add").validate();
+				return $("#form_constant_add").validate();
 			},
 			success : function(json) {
 				if (json.success) {
 					if(flag){
 						window.location.reload(); // 重新加载页面
 					}else{
-						window.location.href = "/admin/sys_auth_dept";
+						window.location.href = "/admin/sys_constant";
 					}
 				} else {
 					error_tip(json.msg);
 				}
 			}
 		};
-		$('#form_dept_add').ajaxSubmit(option);
+		$('#form_constant_add').ajaxSubmit(option);
 	}
 </script>
 </@layout>
