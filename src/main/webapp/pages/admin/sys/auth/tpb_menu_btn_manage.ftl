@@ -101,19 +101,25 @@
 				field : 'btn_name',
 				title : '按钮名称',
 				align : 'center',
-				width : '20%',
+				width : '10%',
 				editor : 'text'
 			}, {
 				field : 'btn_code',
 				title : '按钮code',
-				align : 'center',
-				width : '15%',
+				align : 'left',
+				width : '10%',
+				editor : 'text'
+			}, {
+				field : 'permission',
+				title : '权限标识',
+				align : 'left',
+				width : '28%',
 				editor : 'text'
 			}, {
 				field : 'menu_name',
 				title : '所属菜单名称',
-				align : 'center',
-				width : '15%',
+				align : 'left',
+				width : '20%',
 				editor : 'text'
 			}, {
 				field : 'sort_no',
@@ -137,11 +143,6 @@
 			},{
 				field : 'created',
 				title : '创建时间',
-				align : 'center',
-				width : '18%'
-			}, {
-				field : 'updated',
-				title : '更新时间',
 				align : 'center',
 				width : '18%'
 			} ] ]

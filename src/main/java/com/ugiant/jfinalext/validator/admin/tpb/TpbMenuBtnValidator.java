@@ -16,6 +16,7 @@ public class TpbMenuBtnValidator extends BaseValidator {
 		this.validateInteger("tpbMenuBtn.type", 1, 2, "msg", "按钮类型错误");
 		this.validateString("tpbMenuBtn.btn_name", 1, 10, "msg", "菜单名称在1-10个字符之间");
 		this.validateRegex("tpbMenuBtn.btn_code", "^[a-zA-Z0-9_]{1,50}", true, "msg", "按钮编码错误");
+		this.validateString("tpbMenuBtn.permission", 1, 40, "msg", "权限标识在1-40个字符之间");
 		this.validateInteger("tpbMenuBtn.sort_no", 1, 9999, "msg", "排序在1-9999之间，小的排在前面");
 		this.validateRegex("tpbMenuBtn.icon_cls", "^[a-zA-Z0-9_-]{0,50}", true, "msg", "按钮样式错误");
 	}

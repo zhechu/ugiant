@@ -239,7 +239,7 @@ public class SystemService {
 			json.append("\"id\":").append(tempMenu.getInt("id")).append(",");
 			json.append("\"name\":\"").append(tempMenu.getStr("name")).append("\",");
 			json.append("\"status\":\"").append(tempMenu.getInt("status")).append("\",");
-			json.append("\"code\":\"").append(tempMenu.get("code","")).append("\",");
+			json.append("\"permission\":\"").append(tempMenu.get("permission","")).append("\",");
 			json.append("\"link_url\":\"").append(tempMenu.get("link_url","")).append("\",");
 			json.append("\"parent_id\":\"").append(tempMenu.get("parent_id","")).append("\",");
 			json.append("\"icon_cls\":\"").append(tempMenu.get("icon_cls","")).append("\",");

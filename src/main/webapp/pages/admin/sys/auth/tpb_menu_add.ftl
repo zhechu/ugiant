@@ -50,18 +50,18 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-md-3">菜单编码 <span class="required">
-							* </span>
-							</label>
-							<div class="col-md-4">
-								<input name="tpbMenu.code" type="text" class="form-control" value="${(tpbMenu.code)!}"/>
-							</div>
-						</div>
-						<div class="form-group">
 							<label class="control-label col-md-3">菜单URL 
 							</label>
 							<div class="col-md-4">
 								<input type="text" class="form-control" name="tpbMenu.link_url" value="${(tpbMenu.link_url)!}"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-3">权限标识 <span class="required">
+							* </span>
+							</label>
+							<div class="col-md-4">
+								<input name="tpbMenu.permission" type="text" class="form-control" value="${(tpbMenu.permission)!}"/>
 							</div>
 						</div>
 						<div class="form-group">

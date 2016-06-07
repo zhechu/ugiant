@@ -84,16 +84,16 @@ jQuery(function() {
 			width : '20%',
 			editor : 'text'
 		}, {
-			field : 'code',
-			title : '编码',
-			align : 'center',
-			width : '15%',
-			editor : 'text'
-		}, {
 			field : 'link_url',
 			title : '链接URL',
-			align : 'center',
-			width : '15%',
+			align : 'left',
+			width : '17%',
+			editor : 'text'
+		}, {
+			field : 'permission',
+			title : '权限标识',
+			align : 'left',
+			width : '16%',
 			editor : 'text'
 		}, {
 			field : 'menu_level',
@@ -110,7 +110,7 @@ jQuery(function() {
 			field : 'status',
 			title : '状态',
 			align : 'center',
-			width : '8%',
+			width : '5%',
 			formatter: function(value, row, index){
 				if (value == 1) {
 					return '<span class="label label-success">正常</span>';

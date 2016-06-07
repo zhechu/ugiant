@@ -66,6 +66,14 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label class="control-label col-md-3">权限标识 <span class="required">
+							* </span>
+							</label>
+							<div class="col-md-4">
+								<input name="tpbMenuBtn.permission" type="text" class="form-control" value="${(tpbMenuBtn.permission)!''}"/>
+							</div>
+						</div>
+						<div class="form-group">
 							<label class="control-label col-md-3">按钮样式 
 							</label>
 							<div class="col-md-4">
