@@ -1237,4 +1237,25 @@ public class SystemService {
 		}
 	}
 	
+	/**
+	 * 根据角色字符串获取权限标识列表
+	 * @param roleIds 角色字符串
+	 * @return
+	 */
+	public List<String> findPermissionByRoleIds(String roleIds) {
+		List<String> permissionList = new ArrayList<String>();
+		if (StrKit.isBlank(roleIds)) {
+			return permissionList;
+		}
+		List<Record> menuList = tpbRoleMenuDao.findByRoleIds(roleIds);
+		for (Record menu : menuList) {
+			permissionList.add(menu.getStr("permission"));
+		}
+		List<Record> menuBtnList = tpbRoleMenuBtnDao.findByRoleIds(roleIds);
+		for (Record menuBtn : menuBtnList) {
+			permissionList.add(menuBtn.getStr("permission"));
+		}
+		return permissionList;
+	}
+	
 }

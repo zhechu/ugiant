@@ -92,5 +92,17 @@ public class TpbRoleMenuBtn extends BaseModel<TpbRoleMenuBtn> {
 		}
 		return false;
 	}
+
+	/**
+	 * 根据角色 ids 获取菜单按钮列表
+	 * @param roleIds
+	 * @return
+	 */
+	public List<Record> findByRoleIds(String roleIds) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("select a.* from tpb_menu_btn a left join tpb_role_menu_btn b on b.btn_id = a.id");
+		sql.append(" where b.role_id in (").append(roleIds).append(")");
+		return Db.find(sql.toString());
+	}
 	
 }

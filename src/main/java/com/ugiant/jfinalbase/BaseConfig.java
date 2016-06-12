@@ -14,10 +14,8 @@ import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.c3p0.C3p0Plugin;
 import com.jfinal.render.ViewType;
-import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.constant.base.Table;
-import com.ugiant.jfinalext.model.base.LoginUserInfo;
-import com.ugiant.jfinalext.model.tpb.TpbSysConstant;
+import com.ugiant.jfinalext.interceptor.AuthInterceptor;
 import com.ugiant.jfinalext.model.tpb.TpbDepartment;
 import com.ugiant.jfinalext.model.tpb.TpbDepartmentUser;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;
@@ -26,6 +24,7 @@ import com.ugiant.jfinalext.model.tpb.TpbRole;
 import com.ugiant.jfinalext.model.tpb.TpbRoleMenu;
 import com.ugiant.jfinalext.model.tpb.TpbRoleMenuBtn;
 import com.ugiant.jfinalext.model.tpb.TpbRoleUser;
+import com.ugiant.jfinalext.model.tpb.TpbSysConstant;
 import com.ugiant.jfinalext.model.tpb.TpbSysUser;
 import com.ugiant.jfinalext.route.AdminRoute;
 import com.ugiant.jfinalext.service.tpb.SystemService;
@@ -73,30 +72,7 @@ public class BaseConfig extends JFinalConfig {
 
 	@Override
 	public void configInterceptor(Interceptors me) {
-		// 登录验证拦截器
-		me.add(new Interceptor() {
-			public void intercept(Invocation inv) {
-				String rpath = inv.getController().getRequest().getServletPath();
-				boolean flag = false; // 用户登录标记
-				LoginUserInfo loginUserInfo = (LoginUserInfo) inv.getController().getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-				if (loginUserInfo != null) {
-					flag = true;
-					inv.getController().setAttr("username", loginUserInfo.getUsername());
-				}
-				
-				if (loginUserInfo != null && rpath.equals("/")) {
-					inv.getController().redirect("/admin"); // 若用户已登录，则重定向到后台首页
-					return;
-				}
-				
-				if(rpath.startsWith("/admin") && !flag){
-					inv.getController().redirect("/"); // 若用户未登录，则重定向到登录页
-					return;
-				}
-				
-				inv.invoke();
-			}
-		});
+		me.add(new AuthInterceptor()); // 权限拦截
 		
 		// 获取当前菜单或上级菜单，用于调整当前菜单样式
 		me.add(new Interceptor() {

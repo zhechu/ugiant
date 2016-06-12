@@ -4,6 +4,8 @@ import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.jfinalbase.BaseController;
+import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
+import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.interceptor.UserMenuBtnAllInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
@@ -17,6 +19,7 @@ import com.ugiant.jfinalext.validator.common.IdValidator;
  * @author lingyuwang
  *
  */
+@RequiresAuthentication
 public class TpbDepartmentController extends BaseController {
 
 	private SystemService systemService = SystemService.service; // 系统管理业务 service
@@ -24,6 +27,7 @@ public class TpbDepartmentController extends BaseController {
 	/**
 	 * 进入部门管理页
 	 */
+	@RequiresPermissions({"sys:manage:dept:view"})
 	@Before(UserMenuBtnAllInterceptor.class)
 	public void index(){
 		this.render("tpb_dept_manage.ftl");
