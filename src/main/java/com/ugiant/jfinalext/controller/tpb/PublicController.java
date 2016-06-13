@@ -78,6 +78,8 @@ public class PublicController extends BaseController {
 				loginUserInfo.setDeptId(dept.getInt("id"));
 			}
 			loginUserInfo.setRoleIds(roleIds);
+			List<String> permissionList = systemService.findPermissionByRoleIds(roleIds);
+			loginUserInfo.setPermissionList(permissionList);
 			
 			// 将登录用户信息存入 session
 			this.getSession().setAttribute(SessionAttriKey.LOGIN_USER_INFO, loginUserInfo);

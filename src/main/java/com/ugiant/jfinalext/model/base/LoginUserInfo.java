@@ -1,6 +1,8 @@
 package com.ugiant.jfinalext.model.base;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 后台用户登录信息
@@ -18,6 +20,8 @@ public class LoginUserInfo implements Serializable {
 	private Integer deptId; // 部门 id
 	
 	private String username; // 用户名
+	
+	private List<String> permissionList = new ArrayList<String>(0);
 	
 	public LoginUserInfo() {}
 
@@ -51,6 +55,14 @@ public class LoginUserInfo implements Serializable {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public List<String> getPermissionList() {
+		return permissionList;
+	}
+
+	public void setPermissionList(List<String> permissionList) {
+		this.permissionList = permissionList;
 	}
 	
 }

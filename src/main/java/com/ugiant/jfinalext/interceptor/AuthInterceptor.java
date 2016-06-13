@@ -11,7 +11,6 @@ import com.ugiant.jfinalbase.BaseInterceptor;
 import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
 import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
-import com.ugiant.jfinalext.service.tpb.SystemService;
 
 /**
  * 权限 拦截器
@@ -20,8 +19,6 @@ import com.ugiant.jfinalext.service.tpb.SystemService;
  */
 public class AuthInterceptor extends BaseInterceptor {
 
-	private SystemService systemService = SystemService.service; // 系统管理业务 service
-	
 	public void intercept(Invocation inv) {
 		Controller controller = inv.getController();
 		Class<?> clazz = controller.getClass();
@@ -42,8 +39,7 @@ public class AuthInterceptor extends BaseInterceptor {
 		if (requiresPermissions != null) { // 有权限控制
 			String[] permissions = requiresPermissions.value();
 			LoginUserInfo loginUserInfo = (LoginUserInfo) controller.getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			String roleIds = loginUserInfo.getRoleIds(); // 用户角色字符串
-			List<String> permissionList = systemService.findPermissionByRoleIds(roleIds);
+			List<String> permissionList = loginUserInfo.getPermissionList();
 			int sureSize = 0; // 确定权限个数
 			for (String requiresPermission : permissionList) {
 				if (permissionList.contains(requiresPermission)) {
@@ -71,8 +67,7 @@ public class AuthInterceptor extends BaseInterceptor {
 		if (requiresPermissions != null) { // 有权限控制
 			String[] permissions = requiresPermissions.value();
 			LoginUserInfo loginUserInfo = (LoginUserInfo) controller.getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
-			String roleIds = loginUserInfo.getRoleIds(); // 用户角色字符串
-			List<String> permissionList = systemService.findPermissionByRoleIds(roleIds);
+			List<String> permissionList = loginUserInfo.getPermissionList();
 			int sureSize = 0; // 确定权限个数
 			for (String requiresPermission : permissions) {
 				if (permissionList.contains(requiresPermission)) {
