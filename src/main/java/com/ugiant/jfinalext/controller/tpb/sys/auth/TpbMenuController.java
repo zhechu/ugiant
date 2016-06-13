@@ -12,6 +12,8 @@ import com.ugiant.constant.tpb.TpbMenuType;
 import com.ugiant.exception.MyException;
 import com.ugiant.exception.MyMessage;
 import com.ugiant.jfinalbase.BaseController;
+import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
+import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.interceptor.UserMenuBtnAllInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
@@ -25,6 +27,7 @@ import com.ugiant.jfinalext.validator.common.IdValidator;
  * @author lingyuwang
  *
  */
+@RequiresAuthentication
 public class TpbMenuController extends BaseController {
 
 	private SystemService systemService = SystemService.service; // 系统管理业务 service
@@ -32,6 +35,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 进入菜单管理页
 	 */
+	@RequiresPermissions({"sys:manage:menu:view"})
 	@Before(UserMenuBtnAllInterceptor.class)
 	public void index(){
 		this.render("tpb_menu_manage.ftl");
@@ -63,6 +67,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 获取树菜单
 	 */
+	@RequiresPermissions({"sys:manage:menu:view"})
 	public void treegrid_data(){
 		this.renderJson(systemService.getRootMenuTreeJson());
 	}
@@ -70,6 +75,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 进入添加菜单页面
 	 */
+	@RequiresPermissions({"sys:manage:menu:add"})
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
 		TpbMenu menu = systemService.findMenuById(id);
@@ -82,6 +88,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 获取菜单列表json字符串,直接返回
 	 */
+	@RequiresPermissions({"sys:manage:menu:view"})
 	public void getTreeMenuJson(){
 		String json = systemService.getMenuJson(0, null, TpbMenuType.ADMIN);
 		this.renderJson(json);
@@ -90,6 +97,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 添加或更新菜单
 	 */
+	@RequiresPermissions({"sys:manage:menu:add", "sys:manage:menu:edit"})
 	@Before({TpbMenuValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
@@ -109,6 +117,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 禁用
 	 */
+	@RequiresPermissions({"sys:manage:menu:forbidden"})
 	@Before({IdValidator.class, Tx.class})
 	public void forbidden(){
 		ResponseModel rm = new ResponseModel();
@@ -123,6 +132,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 启用
 	 */
+	@RequiresPermissions({"sys:manage:menu:normal"})
 	@Before({IdValidator.class, Tx.class})
 	public void normal(){
 		ResponseModel rm = new ResponseModel();
@@ -137,6 +147,7 @@ public class TpbMenuController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@RequiresPermissions({"sys:manage:menu:del"})
 	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();

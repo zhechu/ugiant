@@ -9,6 +9,8 @@ import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.constant.base.Status;
 import com.ugiant.exception.MyException;
 import com.ugiant.jfinalbase.BaseController;
+import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
+import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.interceptor.UserMenuBtnAllInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
@@ -23,6 +25,7 @@ import com.ugiant.jfinalext.validator.common.IdValidator;
  * @author lingyuwang
  *
  */
+@RequiresAuthentication
 public class TpbSysUserController extends BaseController {
 
 	private SystemService systemService = SystemService.service; // 系统管理业务 service
@@ -30,6 +33,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 进入后台用户管理页
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:view"})
 	@Before(UserMenuBtnAllInterceptor.class)
 	public void index(){
 		this.render("tpb_sys_user_manage.ftl");
@@ -65,6 +69,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 获取后台用户数据
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:view"})
 	public void data(){
 		List<Record> data = systemService.findTpbSysUser();
 		this.setAttr("rows", data);
@@ -74,6 +79,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 进入添加用户页面
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:add"})
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
 		Record sysUser = systemService.findSysUserDetailById(id);
@@ -86,6 +92,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 添加或更新
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:add", "sys:manage:sysuser:edit"})
 	@Before({TpbSysUserValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
@@ -107,6 +114,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 禁用
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:forbidden"})
 	@Before({IdValidator.class, Tx.class})
 	public void forbidden(){
 		ResponseModel rm = new ResponseModel();
@@ -121,6 +129,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 启用
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:normal"})
 	@Before({IdValidator.class, Tx.class})
 	public void normal(){
 		ResponseModel rm = new ResponseModel();
@@ -135,6 +144,7 @@ public class TpbSysUserController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@RequiresPermissions({"sys:manage:sysuser:del"})
 	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();

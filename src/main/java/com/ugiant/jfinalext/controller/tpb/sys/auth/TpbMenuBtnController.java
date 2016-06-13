@@ -10,6 +10,8 @@ import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.constant.base.Status;
 import com.ugiant.exception.MyException;
 import com.ugiant.jfinalbase.BaseController;
+import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
+import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.interceptor.UserMenuBtnAllInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
@@ -24,6 +26,7 @@ import com.ugiant.jfinalext.validator.common.IdValidator;
  * @author lingyuwang
  *
  */
+@RequiresAuthentication
 public class TpbMenuBtnController extends BaseController {
 
 	private SystemService systemService = SystemService.service; // 系统管理业务 service
@@ -31,6 +34,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 进入菜单按钮管理页
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:view"})
 	@Before(UserMenuBtnAllInterceptor.class)
 	public void index(){
 		this.render("tpb_menu_btn_manage.ftl");
@@ -39,6 +43,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 获取菜单按钮数据
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:view"})
 	public void data(){
 		Integer menuId = this.getParaToInt("menuId"); // 菜单 id
 		List<Record> data = systemService.findMenuBtnByMenuId(menuId);
@@ -49,6 +54,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 进入添加菜单按钮页面
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:add"})
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
 		TpbMenuBtn menuBtn = systemService.findMenuBtnById(id);
@@ -61,6 +67,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 添加或更新
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:add", "sys:manage:menubtn:edit"})
 	@Before({TpbMenuBtnValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
@@ -86,6 +93,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 禁用
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:forbidden"})
 	@Before({IdValidator.class, Tx.class})
 	public void forbidden(){
 		ResponseModel rm = new ResponseModel();
@@ -100,6 +108,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 启用
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:normal"})
 	@Before({IdValidator.class, Tx.class})
 	public void normal(){
 		ResponseModel rm = new ResponseModel();
@@ -114,6 +123,7 @@ public class TpbMenuBtnController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@RequiresPermissions({"sys:manage:menubtn:del"})
 	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();

@@ -36,6 +36,7 @@ public class TpbDepartmentController extends BaseController {
 	/**
 	 * 获取树部门
 	 */
+	@RequiresPermissions({"sys:manage:dept:view"})
 	public void treegrid_data(){
 		this.renderJson(systemService.getRootDeptTreeJson());
 	}
@@ -43,6 +44,7 @@ public class TpbDepartmentController extends BaseController {
 	/**
 	 * 进入添加部门页
 	 */
+	@RequiresPermissions({"sys:manage:dept:add"})
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
 		TpbDepartment dept = systemService.findDepartmentById(id);
@@ -55,6 +57,7 @@ public class TpbDepartmentController extends BaseController {
 	/**
 	 * 获取部门列表json字符串,直接返回
 	 */
+	@RequiresPermissions({"sys:manage:dept:view"})
 	public void getTreeDeptJson(){
 		String json = systemService.getDeptJson(0);
 		this.renderJson(json);
@@ -63,6 +66,7 @@ public class TpbDepartmentController extends BaseController {
 	/**
 	 * 添加或更新
 	 */
+	@RequiresPermissions({"sys:manage:dept:add", "sys:manage:dept:edit"})
 	@Before({TpbDepartmentValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
@@ -83,6 +87,7 @@ public class TpbDepartmentController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@RequiresPermissions({"sys:manage:dept:del"})
 	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();

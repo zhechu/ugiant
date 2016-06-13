@@ -9,13 +9,16 @@ import com.jfinal.config.Interceptors;
 import com.jfinal.config.JFinalConfig;
 import com.jfinal.config.Plugins;
 import com.jfinal.config.Routes;
+import com.jfinal.core.Controller;
 import com.jfinal.core.JFinal;
 import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.c3p0.C3p0Plugin;
 import com.jfinal.render.ViewType;
+import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.constant.base.Table;
 import com.ugiant.jfinalext.interceptor.AuthInterceptor;
+import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.tpb.TpbDepartment;
 import com.ugiant.jfinalext.model.tpb.TpbDepartmentUser;
 import com.ugiant.jfinalext.model.tpb.TpbMenu;
@@ -77,11 +80,16 @@ public class BaseConfig extends JFinalConfig {
 		// 获取当前菜单或上级菜单，用于调整当前菜单样式
 		me.add(new Interceptor() {
 			public void intercept(Invocation inv) {
-				String rpath = inv.getController().getRequest().getServletPath();
+				Controller controller = inv.getController();
+				LoginUserInfo loginUserInfo = (LoginUserInfo) controller.getSession().getAttribute(SessionAttriKey.LOGIN_USER_INFO);
+				if (loginUserInfo != null) {
+					inv.getController().setAttr("username", loginUserInfo.getUsername());
+				}
+				String rpath = controller.getRequest().getServletPath();
 				// 获取当前菜单或上级菜单 ids
 				String menuIds = SystemService.service.findMenuParentIdsByLinkUrl(rpath);
 				if (menuIds != null) {
-					inv.getController().setAttr("menuIds", menuIds);
+					controller.setAttr("menuIds", menuIds);
 				}
 				inv.invoke();
 			}

@@ -10,6 +10,8 @@ import com.ugiant.constant.base.Status;
 import com.ugiant.exception.MyException;
 import com.ugiant.exception.MyMessage;
 import com.ugiant.jfinalbase.BaseController;
+import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
+import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.interceptor.UserMenuBtnAllInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
@@ -23,6 +25,7 @@ import com.ugiant.jfinalext.validator.common.IdValidator;
  * @author lingyuwang
  *
  */
+@RequiresAuthentication
 public class TpbRoleController extends BaseController {
 
 	private SystemService systemService = SystemService.service; // 系统管理业务 service
@@ -30,6 +33,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 进入角色管理页
 	 */
+	@RequiresPermissions({"sys:manage:role:view"})
 	@Before(UserMenuBtnAllInterceptor.class)
 	public void index(){
 		this.render("tpb_role_manage.ftl");
@@ -38,6 +42,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 获取角色数据
 	 */
+	@RequiresPermissions({"sys:manage:role:view"})
 	public void data(){
 		List<Record> data = systemService.findRole();
 		this.setAttr("rows", data);
@@ -47,6 +52,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 获取可用的角色
 	 */
+	@RequiresPermissions({"sys:manage:role:view"})
 	public void datalist(){
 		this.renderJson(systemService.findRoleByStatus(Status.NORMAL));
 	}
@@ -54,6 +60,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 获取角色列表
 	 */
+	@RequiresPermissions({"sys:manage:role:view"})
 	public void list() {
 		ResponseModel rm = new ResponseModel();
 		try {
@@ -72,6 +79,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 进入添加角色页面
 	 */
+	@RequiresPermissions({"sys:manage:role:add"})
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
 		TpbRole role = systemService.findRoleById(id);
@@ -84,6 +92,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 添加或更新
 	 */
+	@RequiresPermissions({"sys:manage:role:add", "sys:manage:role:edit"})
 	@Before({TpbRoleValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
@@ -103,6 +112,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 禁用
 	 */
+	@RequiresPermissions({"sys:manage:role:forbidden"})
 	@Before({IdValidator.class, Tx.class})
 	public void forbidden(){
 		ResponseModel rm = new ResponseModel();
@@ -117,6 +127,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 启用
 	 */
+	@RequiresPermissions({"sys:manage:role:normal"})
 	@Before({IdValidator.class, Tx.class})
 	public void normal(){
 		ResponseModel rm = new ResponseModel();
@@ -131,6 +142,7 @@ public class TpbRoleController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@RequiresPermissions({"sys:manage:role:del"})
 	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();

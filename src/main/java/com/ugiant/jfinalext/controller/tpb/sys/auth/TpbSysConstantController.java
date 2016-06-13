@@ -4,6 +4,8 @@ import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.ugiant.constant.base.SessionAttriKey;
 import com.ugiant.jfinalbase.BaseController;
+import com.ugiant.jfinalbase.annotation.RequiresAuthentication;
+import com.ugiant.jfinalbase.annotation.RequiresPermissions;
 import com.ugiant.jfinalext.interceptor.UserMenuBtnAllInterceptor;
 import com.ugiant.jfinalext.model.base.LoginUserInfo;
 import com.ugiant.jfinalext.model.base.ResponseModel;
@@ -17,6 +19,7 @@ import com.ugiant.jfinalext.validator.common.IdValidator;
  * @author lingyuwang
  *
  */
+@RequiresAuthentication
 public class TpbSysConstantController extends BaseController {
 
 	private SystemService systemService = SystemService.service; // 系统管理业务 service
@@ -24,6 +27,7 @@ public class TpbSysConstantController extends BaseController {
 	/**
 	 * 进入字典管理页
 	 */
+	@RequiresPermissions({"sys:manage:constant:view"})
 	@Before(UserMenuBtnAllInterceptor.class)
 	public void index(){
 		this.render("tpb_sys_constant_manage.ftl");
@@ -32,6 +36,7 @@ public class TpbSysConstantController extends BaseController {
 	/**
 	 * 获取树常量
 	 */
+	@RequiresPermissions({"sys:manage:constant:view"})
 	public void treegrid_data(){
 		this.renderJson(systemService.getRootSysConstantTreeJson());
 	}
@@ -39,6 +44,7 @@ public class TpbSysConstantController extends BaseController {
 	/**
 	 * 进入添加常量页
 	 */
+	@RequiresPermissions({"sys:manage:constant:add"})
 	public void toAdd(){
 		Integer id = this.getParaToInt("id");
 		TpbSysConstant constant = systemService.findSysConstantById(id);
@@ -51,6 +57,7 @@ public class TpbSysConstantController extends BaseController {
 	/**
 	 * 获取常量列表json字符串,直接返回
 	 */
+	@RequiresPermissions({"sys:manage:constant:view"})
 	public void getTreeSysConstantJson(){
 		String json = systemService.getSysConstantJson(0);
 		this.renderJson(json);
@@ -59,6 +66,7 @@ public class TpbSysConstantController extends BaseController {
 	/**
 	 * 添加或更新
 	 */
+	@RequiresPermissions({"sys:manage:constant:add", "sys:manage:constant:edit"})
 	@Before({TpbSysConstantValidator.class, Tx.class})
 	public void save(){
 		ResponseModel rm = new ResponseModel();
@@ -79,6 +87,7 @@ public class TpbSysConstantController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@RequiresPermissions({"sys:manage:constant:del"})
 	@Before({IdValidator.class, Tx.class})
 	public void remove(){
 		ResponseModel rm = new ResponseModel();
